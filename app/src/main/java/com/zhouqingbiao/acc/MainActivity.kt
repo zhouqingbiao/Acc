@@ -18,8 +18,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun switchAcc(view: View) {
-        var am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-        var cn = ComponentName("com.zhouqingbiao.acc", "com.zhouqingbiao.acc.AccService")
+        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val cn = ComponentName("com.zhouqingbiao.acc", "com.zhouqingbiao.acc.AccService")
         if (am.getRunningServiceControlPanel(cn) == null) {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         } else {
