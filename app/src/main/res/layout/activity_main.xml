@@ -6,12 +6,24 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/switch_acc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:minHeight="48dp"
+        android:onClick="switchAcc"
+        android:text="@string/switch_acc"
+        app:layout_constraintBottom_toTopOf="@+id/button_xxqg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <Button
-        android:id="@+id/xxqg"
+        android:id="@+id/button_xxqg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="startXxqg"
-        android:text="学习强国"
+        android:text="@string/button_xxqg"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
