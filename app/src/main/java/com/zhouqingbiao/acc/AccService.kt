@@ -26,49 +26,49 @@ class AccService : AccessibilityService() {
     private var bdCount = 0
 
     // 登录1分
-    var dl = false
+    var dl = "登录"
 
     // 我要选读文章12分
-    var wyxdwz = false
+    var wyxdwz = "我要选读文章"
 
     // 视听学习6分
-    var stxx = false
+    var stxx = "视听学习"
 
     // 视听学习时长6分
-    var stxxsc = false
+    var stxxsc = "视听学习时长"
 
     // 每日答题5分
-    var mrdt = false
+    var mrdt = "每日答题"
 
     // 每周答题5分
-    var mzdt = false
+    var mzdt = "每周答题"
 
-    // 专项答题5分
-    var zxdt = false
+    // 专项答题10分
+    var zxdt = "专项答题"
 
-    // 挑战答题10分
-    var tzdt = false
+    // 挑战答题6分
+    var tzdt = "挑战答题"
 
     // 四人赛5分
-    var srs = false
+    var srs = "四人赛"
 
     // 双人对战2分
-    var srdz = false
+    var srdz = "双人对战"
 
     // 订阅2分
-    var dy = false
+    var dy = "订阅"
 
     // 分享1分
-    var fx = false
+    var fx = "分享"
 
     // 发表观点1分
-    var fbgd = false
+    var fbgd = "发表观点"
 
     // 本地频道1分
-    var bdpd = false
+    var bdpd = "本地频道"
 
     // 强国运动2分
-    var qgyd = false
+    var qgyd = "强国运动"
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         Log.i(xue, "Event开始")
@@ -83,6 +83,19 @@ class AccService : AccessibilityService() {
             Log.i(xue, "找到${size}个积分ViewId")
             if (size > 0) {
                 jf = rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId)[0]
+                Log.i(xue, "${jf.text}积分")
+            }
+            // 计数加1
+            // 不再寻找
+            jfCount = 1
+        }
+
+        // 寻找登录
+        // 找到后不再寻找
+        if (jfCount == 0) {
+            val size = rootInActiveWindow.findAccessibilityNodeInfosByText(dl).size
+            if (size > 0) {
+                rootInActiveWindow.findAccessibilityNodeInfosByText(dl)[0].parent.parent.findAccessibilityNodeInfosByText("已完成")
                 Log.i(xue, "${jf.text}积分")
             }
             // 计数加1
