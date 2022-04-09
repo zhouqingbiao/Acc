@@ -79,14 +79,12 @@ class AccService : AccessibilityService() {
         // 寻找积分ViewId
         // 找到后不再寻找
         if (jfCount == 0) {
-            val size =
-                rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId).size
+            val size = rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId).size
             Log.i(xue, "找到${size}个积分ViewId")
             if (size > 0) {
-                jf =
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId)[0]
+                jf = rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId)[0]
+                Log.i(xue, "${jf.text}积分")
             }
-            Log.i(xue, "${jf.text}积分")
             // 计数加1
             // 不再寻找
             jfCount = 1
@@ -110,12 +108,17 @@ class AccService : AccessibilityService() {
         // 寻找本地ViewId
         // 找到后不再寻找
         if (bdCount == 0) {
-            val size =
-                rootInActiveWindow.findAccessibilityNodeInfosByViewId(bdViewId).size
+
+//                rootInActiveWindow.findAccessibilityNodeInfosByViewId(bdViewId).size
+            val size = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江").size
             Log.i(xue, "找到${size}个本地ViewId")
             if (size > 0) {
-                bd =
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId(bdViewId)[0]
+                Log.i(xue, "${rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].text}")
+                bd = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0]
+                bd.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                // 找到本地
+                // onCirculate(bd)
+
 //                var b = bd.getChild(2).getChild(0).getChild(0).getChild(0).getChild(3)
 //                    .getChild(0) as TextView
 //                Log.i("学习强国", "${b.text}")
@@ -132,5 +135,25 @@ class AccService : AccessibilityService() {
 
     override fun onInterrupt() {
 
+    }
+
+    private fun onCirculate(accessibilityNodeInfo: AccessibilityNodeInfo) {
+        // 有子节点继续执行
+        if (accessibilityNodeInfo.childCount > 0) {
+            // 循环子节点
+            (1 until accessibilityNodeInfo.childCount).forEach { index ->
+                Log.i(xue, "${accessibilityNodeInfo.getChild(index).text}")
+                if (accessibilityNodeInfo.getChild(index).text == "浙江") {
+                    // 找到之后赋值
+                    bd = accessibilityNodeInfo.getChild(index)
+                    // 测试点击
+                    bd.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    return
+                } else {
+                    // 没找到则循环方法
+                    onCirculate(accessibilityNodeInfo.getChild(index))
+                }
+            }
+        }
     }
 }
