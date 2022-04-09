@@ -4,9 +4,12 @@ import android.accessibilityservice.AccessibilityService
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.TextView
 
 class AccService : AccessibilityService() {
+
+    // 学
+    var xue = "学"
+
     // 积分
     private var jfViewId = "cn.xuexi.android:id/comm_head_xuexi_score"
     private lateinit var jf: AccessibilityNodeInfo
@@ -68,22 +71,22 @@ class AccService : AccessibilityService() {
     var qgyd = false
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        Log.i("学习强国", "Event开始")
+        Log.i(xue, "Event开始")
         // 打印eventType
         val eventType = event?.eventType
-        Log.i("学习强国", "eventType:${eventType}")
+        Log.i(xue, "eventType:${eventType}")
 
         // 寻找积分ViewId
         // 找到后不再寻找
         if (jfCount == 0) {
             val size =
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId).size
-            Log.i("学习强国", "找到${size}个积分ViewId")
+            Log.i(xue, "找到${size}个积分ViewId")
             if (size > 0) {
                 jf =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId)[0]
             }
-            Log.i("学习强国", "${jf.text}积分")
+            Log.i(xue, "${jf.text}积分")
             // 计数加1
             // 不再寻找
             jfCount = 1
@@ -94,7 +97,7 @@ class AccService : AccessibilityService() {
         if (blCount == 0) {
             val size =
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId).size
-            Log.i("学习强国", "找到${size}个百灵ViewId")
+            Log.i(xue, "找到${size}个百灵ViewId")
             if (size > 0) {
                 bl =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId)[0]
@@ -109,7 +112,7 @@ class AccService : AccessibilityService() {
         if (bdCount == 0) {
             val size =
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId(bdViewId).size
-            Log.i("学习强国", "找到${size}个本地ViewId")
+            Log.i(xue, "找到${size}个本地ViewId")
             if (size > 0) {
                 bd =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId(bdViewId)[0]
@@ -124,7 +127,7 @@ class AccService : AccessibilityService() {
 
         // 点击积分ViewId
         // jf.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-        Log.i("学习强国", "Event结束")
+        Log.i(xue, "Event结束")
     }
 
     override fun onInterrupt() {
