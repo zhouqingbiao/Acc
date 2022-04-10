@@ -1,9 +1,9 @@
 package com.zhouqingbiao.acc
 
 import android.accessibilityservice.AccessibilityService
-import android.app.ActivityManager
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
+import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Toast
 
@@ -95,17 +95,21 @@ class AccService : AccessibilityService() {
 
             // getJf()
         }
-        jf.canOpenPopup()
-        val size = rootInActiveWindow.findAccessibilityNodeInfosByText(dl).size
-        Toast.makeText(this, "$size", Toast.LENGTH_SHORT).show()
-        Log.i(xue, "${size}")
-        if (size > 0) {
-            dljf =
-                rootInActiveWindow.findAccessibilityNodeInfosByText(dl)[0].parent.parent.getChild(2).text as String
-            Toast.makeText(this, "登录积分${dljf}", Toast.LENGTH_SHORT).show()
-            Log.i(xue, "登录积分${dljf}")
-        }
 
+        Log.i(xue,"${event?.eventType}")
+        val size = rootInActiveWindow.findAccessibilityNodeInfosByText("登录").size
+        if (size > 0) {
+            Toast.makeText(this, "$size", Toast.LENGTH_SHORT).show()
+            Log.i(xue, "$size")
+//            if (size > 0) {
+//                dljf =
+//                    rootInActiveWindow.findAccessibilityNodeInfosByText(dl)[0].parent.parent.getChild(
+//                        2
+//                    ).text as String
+//                Toast.makeText(this, "登录积分${dljf}", Toast.LENGTH_SHORT).show()
+//                Log.i(xue, "登录积分${dljf}")
+//            }
+        }
         // 寻找百灵ViewId
         if (blCount == 0) {
             val size = rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId).size
@@ -149,12 +153,12 @@ class AccService : AccessibilityService() {
     private fun getJf() {
         // 寻找登录
         val size = rootInActiveWindow.findAccessibilityNodeInfosByText(dl).size
-        Toast.makeText(this, "$size", Toast.LENGTH_SHORT)
-        Log.i(xue, "${size}")
+        Toast.makeText(this, "$size", Toast.LENGTH_SHORT).show()
+        Log.i(xue, "$size")
         if (size > 0) {
             dljf =
                 rootInActiveWindow.findAccessibilityNodeInfosByText(dl)[0].parent.parent.getChild(2).text as String
-            Toast.makeText(this, "登录积分${dljf}", Toast.LENGTH_SHORT)
+            Toast.makeText(this, "登录积分${dljf}", Toast.LENGTH_SHORT).show()
             Log.i(xue, "登录积分${dljf}")
         }
         // 返回
