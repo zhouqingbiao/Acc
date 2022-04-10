@@ -1,9 +1,11 @@
 package com.zhouqingbiao.acc
 
 import android.accessibilityservice.AccessibilityService
+import android.app.ActivityManager
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Toast
 
 class AccService : AccessibilityService() {
 
@@ -25,8 +27,16 @@ class AccService : AccessibilityService() {
     private lateinit var bd: AccessibilityNodeInfo
     private var bdCount = 0
 
+    // 工作
+    private var gzViewId = "cn.xuexi.android:id/home_bottom_tab_button_work"
+    private lateinit var gz: AccessibilityNodeInfo
+    private var gzCount = 0
+
     // 登录1分
     var dl = "登录"
+
+    // 登录积分
+    var dljf = ""
 
     // 我要选读文章12分
     var wyxdwz = "我要选读文章"
@@ -71,74 +81,52 @@ class AccService : AccessibilityService() {
     var qgyd = "强国运动"
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        Log.i(xue, "Event开始")
-        // 打印eventType
-        val eventType = event?.eventType
-//        Log.i(xue, "eventType:${eventType}")
 
         // 寻找积分ViewId
-        // 找到后不再寻找
         if (jfCount == 0) {
             val size = rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId).size
-            Log.i(xue, "找到${size}个积分ViewId")
             if (size > 0) {
                 jf = rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId)[0]
                 Log.i(xue, "${jf.text}积分")
+                jfCount++
             }
-            // 计数加1
-            // 不再寻找
-            jfCount = 1
-        }
+            // 点击积分
+            // jf.performAction(AccessibilityNodeInfo.ACTION_CLICK)
 
-        // 寻找登录
-        // 找到后不再寻找
-        if (jfCount == 0) {
-            val size = rootInActiveWindow.findAccessibilityNodeInfosByText(dl).size
-            if (size > 0) {
-                rootInActiveWindow.findAccessibilityNodeInfosByText(dl)[0].parent.parent.findAccessibilityNodeInfosByText("已完成")
-                Log.i(xue, "${jf.text}积分")
-            }
-            // 计数加1
-            // 不再寻找
-            jfCount = 1
+            // getJf()
+        }
+        jf.canOpenPopup()
+        val size = rootInActiveWindow.findAccessibilityNodeInfosByText(dl).size
+        Toast.makeText(this, "$size", Toast.LENGTH_SHORT).show()
+        Log.i(xue, "${size}")
+        if (size > 0) {
+            dljf =
+                rootInActiveWindow.findAccessibilityNodeInfosByText(dl)[0].parent.parent.getChild(2).text as String
+            Toast.makeText(this, "登录积分${dljf}", Toast.LENGTH_SHORT).show()
+            Log.i(xue, "登录积分${dljf}")
         }
 
         // 寻找百灵ViewId
-        // 找到后不再寻找
         if (blCount == 0) {
-            val size =
-                rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId).size
-            Log.i(xue, "找到${size}个百灵ViewId")
+            val size = rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId).size
             if (size > 0) {
-                bl =
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId)[0]
+                bl = rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId)[0]
+                Log.i(xue, "百灵")
+                blCount++
             }
-            // 计数加1
-            // 不再寻找
-            blCount = 1
         }
 
         // 寻找本地ViewId
-        // 找到后不再寻找
         if (bdCount == 0) {
             val size = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江").size
-            Log.i(xue, "找到本地")
             if (size > 0) {
                 Log.i(xue, "${rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].text}")
                 bd = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].parent
+                bdCount++
+
                 // bd.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-
-                // 找到本地
-                onCirculate(rootInActiveWindow)
             }
-            // 计数加1
-            // 不再寻找
-            bdCount = 1
         }
-
-        // 点击积分ViewId
-        // jf.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-        Log.i(xue, "Event结束")
     }
 
     override fun onInterrupt() {
@@ -156,5 +144,20 @@ class AccService : AccessibilityService() {
                 }
             }
         }
+    }
+
+    private fun getJf() {
+        // 寻找登录
+        val size = rootInActiveWindow.findAccessibilityNodeInfosByText(dl).size
+        Toast.makeText(this, "$size", Toast.LENGTH_SHORT)
+        Log.i(xue, "${size}")
+        if (size > 0) {
+            dljf =
+                rootInActiveWindow.findAccessibilityNodeInfosByText(dl)[0].parent.parent.getChild(2).text as String
+            Toast.makeText(this, "登录积分${dljf}", Toast.LENGTH_SHORT)
+            Log.i(xue, "登录积分${dljf}")
+        }
+        // 返回
+        // performGlobalAction(GLOBAL_ACTION_BACK)
     }
 }
