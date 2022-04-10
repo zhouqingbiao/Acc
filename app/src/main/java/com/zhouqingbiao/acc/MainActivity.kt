@@ -29,6 +29,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun startXxqg(view: View) {
-        startActivity(packageManager.getLaunchIntentForPackage("cn.xuexi.android"))
+//        var intent = Intent()
+//        var pkg = "cn.xuexi.android"
+//        var cls = "com.alibaba.android.rimet.biz.SplashActivity"
+//        cls = "com.alibaba.android.rimet.biz.BokuiActivity"
+//        cls = "com.alibaba.android.rimet.biz.home.activity.MineHomeActivity"
+//        intent.component = ComponentName(pkg, cls)
+//        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//        startActivity(intent)
+         startActivity(packageManager.getLaunchIntentForPackage("cn.xuexi.android"))
     }
 }

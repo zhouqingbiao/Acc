@@ -96,11 +96,20 @@ class AccService : AccessibilityService() {
             // getJf()
         }
 
-        Log.i(xue,"${event?.eventType}")
-        val size = rootInActiveWindow.findAccessibilityNodeInfosByText("登录").size
-        if (size > 0) {
-            Toast.makeText(this, "$size", Toast.LENGTH_SHORT).show()
-            Log.i(xue, "$size")
+//        Log.i(xue,"${event?.eventType}")
+//        jf.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+        windows.forEach { aw ->
+            var size = aw.root.findAccessibilityNodeInfosByText("王水明").size
+            if (size > 0) {
+                Toast.makeText(this, "登录$size", Toast.LENGTH_SHORT).show()
+                Log.i(xue, "登录$size")
+            }
+        }
+//        performGlobalAction(GLOBAL_ACTION_BACK)
+//        val size = rootInActiveWindow.findAccessibilityNodeInfosByText("登录").size
+//        if (size > 0) {
+//            Toast.makeText(this, "$size", Toast.LENGTH_SHORT).show()
+//            Log.i(xue, "$size")
 //            if (size > 0) {
 //                dljf =
 //                    rootInActiveWindow.findAccessibilityNodeInfosByText(dl)[0].parent.parent.getChild(
@@ -109,7 +118,7 @@ class AccService : AccessibilityService() {
 //                Toast.makeText(this, "登录积分${dljf}", Toast.LENGTH_SHORT).show()
 //                Log.i(xue, "登录积分${dljf}")
 //            }
-        }
+//        }
         // 寻找百灵ViewId
         if (blCount == 0) {
             val size = rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId).size
