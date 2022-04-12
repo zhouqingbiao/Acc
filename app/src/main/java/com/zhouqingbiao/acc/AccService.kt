@@ -3,9 +3,7 @@ package com.zhouqingbiao.acc
 import android.accessibilityservice.AccessibilityService
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
-import android.view.accessibility.AccessibilityManager
 import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.Toast
 
 class AccService : AccessibilityService() {
 
@@ -69,10 +67,10 @@ class AccService : AccessibilityService() {
     var dy = "订阅"
 
     // 分享1分
-    var fx = "分享"
+    var fx = false
 
     // 发表观点1分
-    var fbgd = "发表观点"
+    private var fbgd = false
 
     // 本地频道1分
     var bdpd = "本地频道"
@@ -80,9 +78,20 @@ class AccService : AccessibilityService() {
     // 强国运动2分
     var qgyd = "强国运动"
 
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
 
-        // 寻找积分ViewId
+    private lateinit var menuButton: AccessibilityNodeInfo
+    var menuButtonCount = 0
+
+    private lateinit var szButton: AccessibilityNodeInfo
+    var szButtonCount = 0
+
+    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        val text = "强国城兑福利"
+        val viewId = "cn.xuexi.android:id/webview_frame"
+//        findByText(text, event)
+//        findByViewId(viewId, event)
+
+        // 积分
         if (jfCount == 0) {
             val size = rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId).size
             if (size > 0) {
@@ -90,36 +99,11 @@ class AccService : AccessibilityService() {
                 Log.i(xue, "${jf.text}积分")
                 jfCount++
             }
-            // 点击积分
+
             // jf.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-
-            // getJf()
         }
 
-//        Log.i(xue,"${event?.eventType}")
-//        jf.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-        windows.forEach { aw ->
-            var size = aw.root.findAccessibilityNodeInfosByText("王水明").size
-            if (size > 0) {
-                Toast.makeText(this, "登录$size", Toast.LENGTH_SHORT).show()
-                Log.i(xue, "登录$size")
-            }
-        }
-//        performGlobalAction(GLOBAL_ACTION_BACK)
-//        val size = rootInActiveWindow.findAccessibilityNodeInfosByText("登录").size
-//        if (size > 0) {
-//            Toast.makeText(this, "$size", Toast.LENGTH_SHORT).show()
-//            Log.i(xue, "$size")
-//            if (size > 0) {
-//                dljf =
-//                    rootInActiveWindow.findAccessibilityNodeInfosByText(dl)[0].parent.parent.getChild(
-//                        2
-//                    ).text as String
-//                Toast.makeText(this, "登录积分${dljf}", Toast.LENGTH_SHORT).show()
-//                Log.i(xue, "登录积分${dljf}")
-//            }
-//        }
-        // 寻找百灵ViewId
+        // 百灵
         if (blCount == 0) {
             val size = rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId).size
             if (size > 0) {
@@ -129,11 +113,47 @@ class AccService : AccessibilityService() {
             }
         }
 
-        // 寻找本地ViewId
+        // 分享
+        // 发表观点
+//        if (!fx) {
+//            val size =
+//                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id").size
+//            if (size > 0) {
+//                var b =
+//                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")[0].text
+//                Log.i(xue, "$b")
+//                var a =
+//                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")[0].parent.parent
+//                if (a.isClickable) {
+//                    a.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+//                }
+//            }
+//            fx = true
+//        }
+
+
+        val accessibilityNodeInfosRootInActiveWindow =
+            rootInActiveWindow.findAccessibilityNodeInfosByViewId(viewId)
+        if (accessibilityNodeInfosRootInActiveWindow.size > 0) {
+            (0 until accessibilityNodeInfosRootInActiveWindow.size).forEach { index ->
+                Log.i(
+                    xue,
+                    "findByViewId->rootInActiveWindow->${index}->${accessibilityNodeInfosRootInActiveWindow[index].viewIdResourceName}"
+                )
+                recycle(mutableListOf(accessibilityNodeInfosRootInActiveWindow[index]))
+                findByText()
+            }
+        }
+
+
+        // 本地
         if (bdCount == 0) {
             val size = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江").size
             if (size > 0) {
-                Log.i(xue, "${rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].text}")
+                Log.i(
+                    xue,
+                    "${rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].text}"
+                )
                 bd = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].parent
                 bdCount++
 
@@ -146,31 +166,121 @@ class AccService : AccessibilityService() {
 
     }
 
-    private fun onCirculate(accessibilityNodeInfo: AccessibilityNodeInfo) {
-        if (accessibilityNodeInfo.childCount == 0) {
-            Log.i(xue, "${accessibilityNodeInfo.text}")
-        } else {
-            (1 until accessibilityNodeInfo.childCount).forEach { index ->
-                if (accessibilityNodeInfo.getChild(index) != null) {
-                    Log.i(xue, "${accessibilityNodeInfo.getChild(index).text}")
-                    onCirculate(accessibilityNodeInfo.getChild(index))
+    // 正式
+    private var mutableListAccessibilityNodeInfo: MutableList<AccessibilityNodeInfo> =
+        mutableListOf()
+
+    private fun recycle(mani: MutableList<AccessibilityNodeInfo>) {
+        // 临时
+        val mutableList: MutableList<AccessibilityNodeInfo> =
+            mutableListOf()
+        try {
+            mani.forEach { ani ->
+                // 有子节点才进行添加操作
+                if (ani.childCount > 0) {
+                    (0 until ani.childCount).forEach { index ->
+                        // 同时添加
+                        mutableListAccessibilityNodeInfo.add(ani.getChild(index))
+                        mutableList.add(ani.getChild(index))
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.i(xue, "$e")
+        }
+
+        // 只循环临时
+        if (mutableList.size > 0) {
+            recycle(mutableList)
+        }
+    }
+
+    private fun findByText() {
+        mutableListAccessibilityNodeInfo.forEach { ani ->
+            Log.i(xue, "${ani.className}")
+            Log.i(xue, "${ani.text}")
+        }
+    }
+
+    private fun findByText(text: String, event: AccessibilityEvent?) {
+
+        windows.forEach { accessibilityWindowInfo ->
+            val accessibilityNodeInfosRoot =
+                accessibilityWindowInfo.root.findAccessibilityNodeInfosByText(text)
+
+            if (accessibilityNodeInfosRoot.size > 0) {
+                (0 until accessibilityNodeInfosRoot.size).forEach { index ->
+                    Log.i(
+                        xue,
+                        "findByText->root->${index}->${accessibilityNodeInfosRoot[index].text}"
+                    )
+                }
+            }
+        }
+
+        val accessibilityNodeInfosRootInActiveWindow =
+            rootInActiveWindow.findAccessibilityNodeInfosByText(text)
+        if (accessibilityNodeInfosRootInActiveWindow.size > 0) {
+            (0 until accessibilityNodeInfosRootInActiveWindow.size).forEach { index ->
+                Log.i(
+                    xue,
+                    "findByText->rootInActiveWindow->${index}->${accessibilityNodeInfosRootInActiveWindow[index].text}"
+                )
+            }
+        }
+
+        val accessibilityNodeInfosSource = event?.source?.findAccessibilityNodeInfosByText(text)
+
+        if (accessibilityNodeInfosSource != null) {
+            if (accessibilityNodeInfosSource.size > 0) {
+                (0 until accessibilityNodeInfosSource.size).forEach { index ->
+                    Log.i(
+                        xue,
+                        "findByText->source->${index}->${accessibilityNodeInfosSource[index].text}"
+                    )
                 }
             }
         }
     }
 
-    private fun getJf() {
-        // 寻找登录
-        val size = rootInActiveWindow.findAccessibilityNodeInfosByText(dl).size
-        Toast.makeText(this, "$size", Toast.LENGTH_SHORT).show()
-        Log.i(xue, "$size")
-        if (size > 0) {
-            dljf =
-                rootInActiveWindow.findAccessibilityNodeInfosByText(dl)[0].parent.parent.getChild(2).text as String
-            Toast.makeText(this, "登录积分${dljf}", Toast.LENGTH_SHORT).show()
-            Log.i(xue, "登录积分${dljf}")
+    private fun findByViewId(viewId: String, event: AccessibilityEvent?) {
+
+        windows.forEach { accessibilityWindowInfo ->
+            val accessibilityNodeInfosRoot =
+                accessibilityWindowInfo.root.findAccessibilityNodeInfosByViewId(viewId)
+
+            if (accessibilityNodeInfosRoot.size > 0) {
+                (0 until accessibilityNodeInfosRoot.size).forEach { index ->
+                    Log.i(
+                        xue,
+                        "findByViewId->root->${index}->${accessibilityNodeInfosRoot[index].viewIdResourceName}"
+                    )
+                }
+            }
         }
-        // 返回
-        // performGlobalAction(GLOBAL_ACTION_BACK)
+
+        val accessibilityNodeInfosRootInActiveWindow =
+            rootInActiveWindow.findAccessibilityNodeInfosByViewId(viewId)
+        if (accessibilityNodeInfosRootInActiveWindow.size > 0) {
+            (0 until accessibilityNodeInfosRootInActiveWindow.size).forEach { index ->
+                Log.i(
+                    xue,
+                    "findByViewId->rootInActiveWindow->${index}->${accessibilityNodeInfosRootInActiveWindow[index].viewIdResourceName}"
+                )
+            }
+        }
+
+        val accessibilityNodeInfosSource = event?.source?.findAccessibilityNodeInfosByViewId(viewId)
+
+        if (accessibilityNodeInfosSource != null) {
+            if (accessibilityNodeInfosSource.size > 0) {
+                (0 until accessibilityNodeInfosSource.size).forEach { index ->
+                    Log.i(
+                        xue,
+                        "findByViewId->source->${index}->${accessibilityNodeInfosSource[index].viewIdResourceName}"
+                    )
+                }
+            }
+        }
     }
 }
