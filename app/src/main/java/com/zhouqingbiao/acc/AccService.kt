@@ -85,7 +85,7 @@ class AccService : AccessibilityService() {
     lateinit var dyClick: AccessibilityNodeInfo
 
     // 分享1分
-    var fxText = "分型"
+    var fxText = "分享"
     var fxBoolean = false
     lateinit var fx: AccessibilityNodeInfo
     lateinit var fxF: AccessibilityNodeInfo
@@ -146,7 +146,52 @@ class AccService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+        // 初始化
 
+        // 登录1分
+        dlBoolean = false
+
+        // 我要选读文章12分
+        wyxdwzBoolean = false
+
+        // 视听学习6分
+        stxxBoolean = false
+
+        // 视听学习时长6分
+        stxxscBoolean = false
+
+        // 每日答题5分
+        mrdtBoolean = false
+
+        // 每周答题5分
+        mzdtBoolean = false
+
+        // 专项答题10分
+        zxdtBoolean = false
+
+        // 挑战答题6分
+        tzdtBoolean = false
+
+        // 四人赛5分
+        srsBoolean = false
+
+        // 双人对战2分
+        srdzBoolean = false
+
+        // 订阅2分
+        dyBoolean = false
+
+        // 分享1分
+        fxBoolean = false
+
+        // 发表观点1分
+        fbgdBoolean = false
+
+        // 本地频道1分
+        bdpdBoolean = false
+
+        // 强国运动2分
+        qgydBoolean = false
 
     }
 
@@ -207,10 +252,13 @@ class AccService : AccessibilityService() {
                     )
                     // 遍历所有子节点
                     recycle(mutableListOf(accessibilityNodeInfosRootInActiveWindow[index]))
+
                     // 查找学习积分标题
                     findXxjfBt()
-                    // 查找学习积分明细
 
+                    // 查找学习积分明细
+                    recycle(mutableListOf(dl.parent.parent))
+                    findDl()
                 }
             }
         }
@@ -293,10 +341,11 @@ class AccService : AccessibilityService() {
                 Log.i(xue, "${ani.text}")
             }
         }
+        mutableListAccessibilityNodeInfo.clear()
     }
 
-    // 查找学习积分明细
-    private fun findXxjfMx() {
+    // 查找登录
+    private fun findDl() {
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
@@ -313,6 +362,9 @@ class AccService : AccessibilityService() {
                 Log.i(xue, "${ani.text}")
             }
         }
+        // 找到标记
+        dlBoolean = true
+        mutableListAccessibilityNodeInfo.clear()
     }
 
     private fun findByText(text: String, event: AccessibilityEvent?) {
