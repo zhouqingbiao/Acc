@@ -10,6 +10,9 @@ class AccService : AccessibilityService() {
     // 学
     private var xue = "学"
 
+    // 步骤
+    private var step = 1
+
     // 积分
     private var jfViewId = "cn.xuexi.android:id/comm_head_xuexi_score"
     private var jfBoolean = false
@@ -161,6 +164,8 @@ class AccService : AccessibilityService() {
 
         // 初始化
 
+        step = 1
+
         // 积分
         jfBoolean = false
         jfCount = 0
@@ -227,162 +232,184 @@ class AccService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-
-        // 积分
-        if (!jfBoolean) {
-            val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId)
-            if (temp.size > 0) {
-                jf = temp[0]
-                Log.i(xue, "${jf?.text}积分")
-                jfBoolean = true
-            }
-        }
-
-        // 本地
-        if (!bdBoolean) {
-            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText(bdText)
-            if (temp.size > 0) {
-                bd = temp[0].parent
-                Log.i(xue, bdText)
-                bdBoolean = true
-            }
-        }
-
-        // 发表观点&分享
-        if (!fbgdAndFxBoolean) {
-            val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(fbgdAndFxViewId)
-            if (temp.size > 0) {
-                fbgdAndFx = temp[0].parent.parent
-                Log.i(xue, "发表观点&分享")
-                fbgdAndFxBoolean = true
-            }
-        }
-
-        // 百灵
-        if (!blBoolean) {
-            val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId)
-            if (temp.size > 0) {
-                bl = temp[0]
-                Log.i(xue, "百灵")
-                blBoolean = true
-            }
-        }
-
-        // 工作
-        if (!gzBoolean) {
-            val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(gzViewId)
-            if (temp.size > 0) {
-                gz = temp[0]
-                Log.i(xue, "工作")
-                gzBoolean = true
-            }
-        }
-
-        // 学习积分
-        // 如果 积分存在 学习积分不存在 则执行
-        if (jfBoolean && !xxjfBoolean) {
-            // 点击积分进入学习积分
-            jf?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-            // 查找webview_frame节点
-            xxjf = rootInActiveWindow.findAccessibilityNodeInfosByViewId(xxjfViewId)
-            // 如果有则执行
-            if (xxjf.size > 0) {
-                // 遍历所有子节点
-                (0 until xxjf.size).forEach { index ->
-                    recycle(mutableListOf(xxjf[index]))
+        if (step == 1) {
+            // 积分
+            if (!jfBoolean) {
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId)
+                if (temp.size > 0) {
+                    jf = temp[0]
+                    Log.i(xue, "${jf?.text}积分")
+                    jfBoolean = true
                 }
-                // 查找学习积分标题并赋值
-                findXxjfBt()
+            }
+
+            // 本地
+            if (!bdBoolean) {
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText(bdText)
+                if (temp.size > 0) {
+                    bd = temp[0].parent
+                    Log.i(xue, bdText)
+                    bdBoolean = true
+                }
+            }
+
+            // 发表观点&分享
+            if (!fbgdAndFxBoolean) {
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(fbgdAndFxViewId)
+                if (temp.size > 0) {
+                    fbgdAndFx = temp[0].parent.parent
+                    Log.i(xue, "发表观点&分享")
+                    fbgdAndFxBoolean = true
+                }
+            }
+
+            // 百灵
+            if (!blBoolean) {
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId)
+                if (temp.size > 0) {
+                    bl = temp[0]
+                    Log.i(xue, "百灵")
+                    blBoolean = true
+                }
+            }
+
+            // 工作
+            if (!gzBoolean) {
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(gzViewId)
+                if (temp.size > 0) {
+                    gz = temp[0]
+                    Log.i(xue, "工作")
+                    gzBoolean = true
+                }
+            }
+
+            if (jf != null && bd != null && fbgdAndFx != null && bl != null && gz != null) {
+                step = 2
             }
         }
 
-        // 学习积分明细
-        // 如果学习积分存在则执行
-        if (xxjfBoolean) {
-            if (!dlBoolean && dl != null) {
-                recycle(mutableListOf(dl?.parent?.parent!!))
-                findDl()
+        if (step == 2) {
+            // 学习积分
+            // 如果 积分存在 学习积分不存在 则执行
+            if (jfBoolean && !xxjfBoolean) {
+                // 点击积分进入学习积分
+                jf?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                // 查找webview_frame节点
+                xxjf = rootInActiveWindow.findAccessibilityNodeInfosByViewId(xxjfViewId)
+                // 如果有则执行
+                if (xxjf.size > 0) {
+                    // 遍历所有子节点
+                    (0 until xxjf.size).forEach { index ->
+                        recycle(mutableListOf(xxjf[index]))
+                    }
+                    // 查找学习积分标题并赋值
+                    findXxjfBt()
+                }
             }
-            if (!wyxdwzBoolean && wyxdwz != null) {
-                recycle(mutableListOf(wyxdwz?.parent?.parent!!))
-                findWyxdwz()
-            }
-            if (!stxxBoolean && stxx != null) {
-                recycle(mutableListOf(stxx?.parent?.parent!!))
-                findStxx()
-            }
-            if (!stxxscBoolean && stxxsc != null) {
-                recycle(mutableListOf(stxxsc?.parent?.parent!!))
-                findStxxsc()
-            }
-            if (!mrdtBoolean && mrdt != null) {
-                recycle(mutableListOf(mrdt?.parent?.parent!!))
-                findMrdt()
-            }
-            if (!mzdtBoolean && mzdt != null) {
-                recycle(mutableListOf(mzdt?.parent?.parent!!))
-                findMzdt()
-            }
-            if (!zxdtBoolean && zxdt != null) {
-                recycle(mutableListOf(zxdt?.parent?.parent!!))
-                findZxdt()
-            }
-            if (!tzdtBoolean && tzdt != null) {
-                recycle(mutableListOf(tzdt?.parent?.parent!!))
-                findTzdt()
-            }
-            if (!srsBoolean && srs != null) {
-                recycle(mutableListOf(srs?.parent?.parent!!))
-                findSrs()
-            }
-            if (!srdzBoolean && srdz != null) {
-                recycle(mutableListOf(srdz?.parent?.parent!!))
-                findSrdz()
-            }
-            if (!dyBoolean && dy != null) {
-                recycle(mutableListOf(dy?.parent?.parent!!))
-                findDy()
-            }
-            if (!fxBoolean && fx != null) {
-                recycle(mutableListOf(fx?.parent?.parent!!))
-                findFx()
-            }
-            if (!fbgdBoolean && fbgd != null) {
-                recycle(mutableListOf(fbgd?.parent?.parent!!))
-                findFbgd()
-            }
-            if (!bdpdBoolean && bdpd != null) {
-                recycle(mutableListOf(bdpd?.parent?.parent!!))
-                findBdpd()
-            }
-            if (!qgydBoolean && qgyd != null) {
-                recycle(mutableListOf(qgyd?.parent?.parent!!))
-                findQgyd()
+            if (qgyd != null) {
+                step = 3
             }
         }
 
-        // 拿到所有积分明细后BACK
-        if (qgydBoolean && !xxjfBack) {
-            performGlobalAction(GLOBAL_ACTION_BACK)
-            xxjfBack = true
-        }
-
-        // 发表观点
-        // 分享
-        if (xxjfBack) {
-            if (fbgdClick!!.text == "去看看") {
-                fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+        if (step == 3) {
+            // 学习积分明细
+            // 如果学习积分存在则执行
+            if (xxjfBoolean) {
+                if (!dlBoolean && dl != null) {
+                    recycle(mutableListOf(dl?.parent?.parent!!))
+                    findDl()
+                }
+                if (!wyxdwzBoolean && wyxdwz != null) {
+                    recycle(mutableListOf(wyxdwz?.parent?.parent!!))
+                    findWyxdwz()
+                }
+                if (!stxxBoolean && stxx != null) {
+                    recycle(mutableListOf(stxx?.parent?.parent!!))
+                    findStxx()
+                }
+                if (!stxxscBoolean && stxxsc != null) {
+                    recycle(mutableListOf(stxxsc?.parent?.parent!!))
+                    findStxxsc()
+                }
+                if (!mrdtBoolean && mrdt != null) {
+                    recycle(mutableListOf(mrdt?.parent?.parent!!))
+                    findMrdt()
+                }
+                if (!mzdtBoolean && mzdt != null) {
+                    recycle(mutableListOf(mzdt?.parent?.parent!!))
+                    findMzdt()
+                }
+                if (!zxdtBoolean && zxdt != null) {
+                    recycle(mutableListOf(zxdt?.parent?.parent!!))
+                    findZxdt()
+                }
+                if (!tzdtBoolean && tzdt != null) {
+                    recycle(mutableListOf(tzdt?.parent?.parent!!))
+                    findTzdt()
+                }
+                if (!srsBoolean && srs != null) {
+                    recycle(mutableListOf(srs?.parent?.parent!!))
+                    findSrs()
+                }
+                if (!srdzBoolean && srdz != null) {
+                    recycle(mutableListOf(srdz?.parent?.parent!!))
+                    findSrdz()
+                }
+                if (!dyBoolean && dy != null) {
+                    recycle(mutableListOf(dy?.parent?.parent!!))
+                    findDy()
+                }
+                if (!fxBoolean && fx != null) {
+                    recycle(mutableListOf(fx?.parent?.parent!!))
+                    findFx()
+                }
+                if (!fbgdBoolean && fbgd != null) {
+                    recycle(mutableListOf(fbgd?.parent?.parent!!))
+                    findFbgd()
+                }
+                if (!bdpdBoolean && bdpd != null) {
+                    recycle(mutableListOf(bdpd?.parent?.parent!!))
+                    findBdpd()
+                }
+                if (!qgydBoolean && qgyd != null) {
+                    recycle(mutableListOf(qgyd?.parent?.parent!!))
+                    findQgyd()
+                }
+            }
+            if (qgydClick != null) {
+                step = 4
             }
         }
 
-        val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点")
-        if (temp.size > 0) {
-            if (temp[0].isClickable) {
-                temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                temp[0].text="学习强国。"
+        if (step == 4) {
+            // 拿到所有积分明细后BACK
+            if (qgydBoolean && !xxjfBack) {
+                performGlobalAction(GLOBAL_ACTION_BACK)
+                xxjfBack = true
+                step = 5
             }
         }
 
+        if (step == 5) {
+            // 发表观点
+            // 分享
+            if (xxjfBack) {
+                if (fbgdClick!!.text == "去看看") {
+                    fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                }
+            }
+            step = 6
+        }
+        if (step == 6) {
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点")
+            if (temp.size > 0) {
+                if (temp[0].isClickable) {
+                    temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    temp[0].text = "学习强国。"
+                }
+            }
+            step = 7
+        }
     }
 
     override fun onInterrupt() {
