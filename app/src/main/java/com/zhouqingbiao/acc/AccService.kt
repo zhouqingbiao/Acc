@@ -22,6 +22,12 @@ class AccService : AccessibilityService() {
     private var bd: AccessibilityNodeInfo? = null
     private var bdCount = 0
 
+    // 发表观点&分享
+    private var fbgdAndFxViewId = "cn.xuexi.android:id/general_card_title_id"
+    private var fbgdAndFxBoolean = false
+    private var fbgdAndFx: AccessibilityNodeInfo? = null
+    private var fbgdAndFxCount = 0
+
     // 百灵
     private var blViewId = "cn.xuexi.android:id/home_bottom_tab_button_ding"
     private var blBoolean = false
@@ -125,6 +131,7 @@ class AccService : AccessibilityService() {
     private var fx: AccessibilityNodeInfo? = null
     private var fxF: AccessibilityNodeInfo? = null
     private var fxClick: AccessibilityNodeInfo? = null
+    private var fxFinish = false
 
     // 发表观点1分
     private var fbgdText = "发表观点"
@@ -132,6 +139,7 @@ class AccService : AccessibilityService() {
     private var fbgd: AccessibilityNodeInfo? = null
     private var fbgdF: AccessibilityNodeInfo? = null
     private var fbgdClick: AccessibilityNodeInfo? = null
+    private var fbgdFinsh = false
 
     // 本地频道1分
     private var bdpdText = "本地频道"
@@ -240,6 +248,16 @@ class AccService : AccessibilityService() {
             }
         }
 
+        // 发表观点&分享
+        if (!fbgdAndFxBoolean) {
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(fbgdAndFxViewId)
+            if (temp.size > 0) {
+                fbgdAndFx = temp[0].parent.parent
+                Log.i(xue, "发表观点&分享")
+                fbgdAndFxBoolean = true
+            }
+        }
+
         // 百灵
         if (!blBoolean) {
             val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId)
@@ -343,7 +361,7 @@ class AccService : AccessibilityService() {
             }
         }
 
-        //
+        // 拿到所有积分明细后BACK
         if (qgydBoolean && !xxjfBack) {
             performGlobalAction(GLOBAL_ACTION_BACK)
             xxjfBack = true
@@ -351,18 +369,20 @@ class AccService : AccessibilityService() {
 
         // 发表观点
         // 分享
-        if (fbgdClick != null) {
+        if (xxjfBack) {
             if (fbgdClick!!.text == "去看看") {
-                val temp =
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
-                if (temp.size > 0) {
-                    if (temp[0].parent.parent.isClickable) {
-                        temp[0].parent.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                        Log.i(xue, "11")
-                    }
-                }
+                fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
             }
         }
+
+        val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点")
+        if (temp.size > 0) {
+            if (temp[0].isClickable) {
+                temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                temp[0].text="学习强国。"
+            }
+        }
+
     }
 
     override fun onInterrupt() {
