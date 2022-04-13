@@ -7,147 +7,169 @@ import android.view.accessibility.AccessibilityNodeInfo
 
 class AccService : AccessibilityService() {
 
-    // 登录1分
-    var dlText = "登录"
-    var dlBoolean = false
-    lateinit var dl: AccessibilityNodeInfo
-    lateinit var dlF: AccessibilityNodeInfo
-    lateinit var dlClick: AccessibilityNodeInfo
-
-    // 我要选读文章12分
-    var wyxdwzText = "我要选读文章"
-    var wyxdwzBoolean = false
-    lateinit var wyxdwz: AccessibilityNodeInfo
-    lateinit var wyxdwzF: AccessibilityNodeInfo
-    lateinit var wyxdwzClick: AccessibilityNodeInfo
-
-    // 视听学习6分
-    var stxxText = "视听学习"
-    var stxxBoolean = false
-    lateinit var stxx: AccessibilityNodeInfo
-    lateinit var stxxF: AccessibilityNodeInfo
-    lateinit var stxxClick: AccessibilityNodeInfo
-
-    // 视听学习时长6分
-    var stxxscText = "视听学习时长"
-    var stxxscBoolean = false
-    lateinit var stxxsc: AccessibilityNodeInfo
-    lateinit var stxxscF: AccessibilityNodeInfo
-    lateinit var stxxscClick: AccessibilityNodeInfo
-
-    // 每日答题5分
-    var mrdtText = "每日答题"
-    var mrdtBoolean = false
-    lateinit var mrdt: AccessibilityNodeInfo
-    lateinit var mrdtF: AccessibilityNodeInfo
-    lateinit var mrdtClick: AccessibilityNodeInfo
-
-    // 每周答题5分
-    var mzdtText = "每周答题"
-    var mzdtBoolean = false
-    lateinit var mzdt: AccessibilityNodeInfo
-    lateinit var mzdtF: AccessibilityNodeInfo
-    lateinit var mzdtClick: AccessibilityNodeInfo
-
-    // 专项答题10分
-    var zxdtText = "专项答题"
-    var zxdtBoolean = false
-    lateinit var zxdt: AccessibilityNodeInfo
-    lateinit var zxdtF: AccessibilityNodeInfo
-    lateinit var zxdtClick: AccessibilityNodeInfo
-
-    // 挑战答题6分
-    var tzdtText = "挑战答题"
-    var tzdtBoolean = false
-    lateinit var tzdt: AccessibilityNodeInfo
-    lateinit var tzdtF: AccessibilityNodeInfo
-    lateinit var tzdtClick: AccessibilityNodeInfo
-
-    // 四人赛5分
-    var srsText = "四人赛"
-    var srsBoolean = false
-    lateinit var srs: AccessibilityNodeInfo
-    lateinit var srsF: AccessibilityNodeInfo
-    lateinit var srsClick: AccessibilityNodeInfo
-
-    // 双人对战2分
-    var srdzText = "双人对战"
-    var srdzBoolean = false
-    lateinit var srdz: AccessibilityNodeInfo
-    lateinit var srdzF: AccessibilityNodeInfo
-    lateinit var srdzClick: AccessibilityNodeInfo
-
-    // 订阅2分
-    var dyText = "订阅"
-    var dyBoolean = false
-    lateinit var dy: AccessibilityNodeInfo
-    lateinit var dyF: AccessibilityNodeInfo
-    lateinit var dyClick: AccessibilityNodeInfo
-
-    // 分享1分
-    var fxText = "分享"
-    var fxBoolean = false
-    lateinit var fx: AccessibilityNodeInfo
-    lateinit var fxF: AccessibilityNodeInfo
-    lateinit var fxClick: AccessibilityNodeInfo
-
-    // 发表观点1分
-    var fbgdText = "发表观点"
-    var fbgdBoolean = false
-    lateinit var fbgd: AccessibilityNodeInfo
-    lateinit var fbgdF: AccessibilityNodeInfo
-    lateinit var fbgdClick: AccessibilityNodeInfo
-
-    // 本地频道1分
-    var bdpdText = "本地频道"
-    var bdpdBoolean = false
-    lateinit var bdpd: AccessibilityNodeInfo
-    lateinit var bdpdF: AccessibilityNodeInfo
-    lateinit var bdpdClick: AccessibilityNodeInfo
-
-    // 强国运动2分
-    var qgydText = "强国运动"
-    var qgydBoolean = false
-    lateinit var qgyd: AccessibilityNodeInfo
-    lateinit var qgydF: AccessibilityNodeInfo
-    lateinit var qgydClick: AccessibilityNodeInfo
-
-    // ------------------------------------------------------------
-
     // 学
-    var xue = "学"
+    private var xue = "学"
 
     // 积分
     private var jfViewId = "cn.xuexi.android:id/comm_head_xuexi_score"
-    var jfBoolean = false
-    private lateinit var jf: AccessibilityNodeInfo
+    private var jfBoolean = false
+    private var jf: AccessibilityNodeInfo? = null
     private var jfCount = 0
 
-    // 百灵
-    var blViewId = "cn.xuexi.android:id/home_bottom_tab_button_ding"
-    private lateinit var bl: AccessibilityNodeInfo
-    var blCount = 0
-
     // 本地
-    private var bdViewId = "cn.xuexi.android:id/view_pager"
-    private lateinit var bd: AccessibilityNodeInfo
+    private var bdText = "浙江"
+    private var bdBoolean = false
+    private var bd: AccessibilityNodeInfo? = null
     private var bdCount = 0
+
+    // 百灵
+    private var blViewId = "cn.xuexi.android:id/home_bottom_tab_button_ding"
+    private var blBoolean = false
+    private var bl: AccessibilityNodeInfo? = null
+    private var blCount = 0
 
     // 工作
     private var gzViewId = "cn.xuexi.android:id/home_bottom_tab_button_work"
-    private lateinit var gz: AccessibilityNodeInfo
+    private var gzBoolean = false
+    private var gz: AccessibilityNodeInfo? = null
     private var gzCount = 0
 
+    // 学习积分
+    private var xxjfViewId = "cn.xuexi.android:id/webview_frame"
+    private var xxjfBoolean = false
+    private var xxjf: MutableList<AccessibilityNodeInfo> = mutableListOf()
+    private var xxjfBack = false
 
-    private lateinit var menuButton: AccessibilityNodeInfo
-    var menuButtonCount = 0
+    // ---------------------------------------------------------------------------------------------
 
-    private lateinit var szButton: AccessibilityNodeInfo
-    var szButtonCount = 0
+    // 登录1分
+    private var dlText = "登录"
+    private var dlBoolean = false
+    private var dl: AccessibilityNodeInfo? = null
+    private var dlF: AccessibilityNodeInfo? = null
+    private var dlClick: AccessibilityNodeInfo? = null
+
+    // 我要选读文章12分
+    private var wyxdwzText = "我要选读文章"
+    private var wyxdwzBoolean = false
+    private var wyxdwz: AccessibilityNodeInfo? = null
+    private var wyxdwzF: AccessibilityNodeInfo? = null
+    private var wyxdwzClick: AccessibilityNodeInfo? = null
+
+    // 视听学习6分
+    private var stxxText = "视听学习"
+    private var stxxBoolean = false
+    private var stxx: AccessibilityNodeInfo? = null
+    private var stxxF: AccessibilityNodeInfo? = null
+    private var stxxClick: AccessibilityNodeInfo? = null
+
+    // 视听学习时长6分
+    private var stxxscText = "视听学习时长"
+    private var stxxscBoolean = false
+    private var stxxsc: AccessibilityNodeInfo? = null
+    private var stxxscF: AccessibilityNodeInfo? = null
+    private var stxxscClick: AccessibilityNodeInfo? = null
+
+    // 每日答题5分
+    private var mrdtText = "每日答题"
+    private var mrdtBoolean = false
+    private var mrdt: AccessibilityNodeInfo? = null
+    private var mrdtF: AccessibilityNodeInfo? = null
+    private var mrdtClick: AccessibilityNodeInfo? = null
+
+    // 每周答题5分
+    private var mzdtText = "每周答题"
+    private var mzdtBoolean = false
+    private var mzdt: AccessibilityNodeInfo? = null
+    private var mzdtF: AccessibilityNodeInfo? = null
+    private var mzdtClick: AccessibilityNodeInfo? = null
+
+    // 专项答题10分
+    private var zxdtText = "专项答题"
+    private var zxdtBoolean = false
+    private var zxdt: AccessibilityNodeInfo? = null
+    private var zxdtF: AccessibilityNodeInfo? = null
+    private var zxdtClick: AccessibilityNodeInfo? = null
+
+    // 挑战答题6分
+    private var tzdtText = "挑战答题"
+    private var tzdtBoolean = false
+    private var tzdt: AccessibilityNodeInfo? = null
+    private var tzdtF: AccessibilityNodeInfo? = null
+    private var tzdtClick: AccessibilityNodeInfo? = null
+
+    // 四人赛5分
+    private var srsText = "四人赛"
+    private var srsBoolean = false
+    private var srs: AccessibilityNodeInfo? = null
+    private var srsF: AccessibilityNodeInfo? = null
+    private var srsClick: AccessibilityNodeInfo? = null
+
+    // 双人对战2分
+    private var srdzText = "双人对战"
+    private var srdzBoolean = false
+    private var srdz: AccessibilityNodeInfo? = null
+    private var srdzF: AccessibilityNodeInfo? = null
+    private var srdzClick: AccessibilityNodeInfo? = null
+
+    // 订阅2分
+    private var dyText = "订阅"
+    private var dyBoolean = false
+    private var dy: AccessibilityNodeInfo? = null
+    private var dyF: AccessibilityNodeInfo? = null
+    private var dyClick: AccessibilityNodeInfo? = null
+
+    // 分享1分
+    private var fxText = "分享"
+    private var fxBoolean = false
+    private var fx: AccessibilityNodeInfo? = null
+    private var fxF: AccessibilityNodeInfo? = null
+    private var fxClick: AccessibilityNodeInfo? = null
+
+    // 发表观点1分
+    private var fbgdText = "发表观点"
+    private var fbgdBoolean = false
+    private var fbgd: AccessibilityNodeInfo? = null
+    private var fbgdF: AccessibilityNodeInfo? = null
+    private var fbgdClick: AccessibilityNodeInfo? = null
+
+    // 本地频道1分
+    private var bdpdText = "本地频道"
+    private var bdpdBoolean = false
+    private var bdpd: AccessibilityNodeInfo? = null
+    private var bdpdF: AccessibilityNodeInfo? = null
+    private var bdpdClick: AccessibilityNodeInfo? = null
+
+    // 强国运动2分
+    private var qgydText = "强国运动"
+    private var qgydBoolean = false
+    private var qgyd: AccessibilityNodeInfo? = null
+    private var qgydF: AccessibilityNodeInfo? = null
+    private var qgydClick: AccessibilityNodeInfo? = null
+
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+
         // 初始化
+
+        // 积分
+        jfBoolean = false
+        jfCount = 0
+
+        // 本地
+        bdBoolean = false
+        bdCount = 0
+
+        // 百灵
+        blBoolean = false
+        blCount = 0
+
+        // 工作
+        gzBoolean = false
+        gzCount = 0
+
+        // -----------------------------------------------------------------------------------------
 
         // 登录1分
         dlBoolean = false
@@ -200,205 +222,147 @@ class AccService : AccessibilityService() {
 
         // 积分
         if (!jfBoolean) {
-            val size = rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId).size
-            if (size > 0) {
-                jf = rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId)[0]
-                Log.i(xue, "${jf.text}积分")
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(jfViewId)
+            if (temp.size > 0) {
+                jf = temp[0]
+                Log.i(xue, "${jf?.text}积分")
                 jfBoolean = true
             }
         }
 
-        // 百灵
-        if (blCount == 0) {
-            val size = rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId).size
-            if (size > 0) {
-                bl = rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId)[0]
-                Log.i(xue, "百灵")
-                blCount++
-            }
-        }
-
         // 本地
-        if (bdCount == 0) {
-            val size = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江").size
-            if (size > 0) {
-                Log.i(
-                    xue,
-                    "${rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].text}"
-                )
-                bd = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].parent
-                bdCount++
+        if (!bdBoolean) {
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText(bdText)
+            if (temp.size > 0) {
+                bd = temp[0].parent
+                Log.i(xue, bdText)
+                bdBoolean = true
             }
         }
 
-        // 分享
+        // 百灵
+        if (!blBoolean) {
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(blViewId)
+            if (temp.size > 0) {
+                bl = temp[0]
+                Log.i(xue, "百灵")
+                blBoolean = true
+            }
+        }
+
+        // 工作
+        if (!gzBoolean) {
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId(gzViewId)
+            if (temp.size > 0) {
+                gz = temp[0]
+                Log.i(xue, "工作")
+                gzBoolean = true
+            }
+        }
+
+        // 学习积分
+        // 如果 积分存在 学习积分不存在 则执行
+        if (jfBoolean && !xxjfBoolean) {
+            // 点击积分进入学习积分
+            jf?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            // 查找webview_frame节点
+            xxjf = rootInActiveWindow.findAccessibilityNodeInfosByViewId(xxjfViewId)
+            // 如果有则执行
+            if (xxjf.size > 0) {
+                // 遍历所有子节点
+                (0 until xxjf.size).forEach { index ->
+                    recycle(mutableListOf(xxjf[index]))
+                }
+                // 查找学习积分标题并赋值
+                findXxjfBt()
+            }
+        }
+
+        // 学习积分明细
+        // 如果学习积分存在则执行
+        if (xxjfBoolean) {
+            if (!dlBoolean && dl != null) {
+                recycle(mutableListOf(dl?.parent?.parent!!))
+                findDl()
+            }
+            if (!wyxdwzBoolean && wyxdwz != null) {
+                recycle(mutableListOf(wyxdwz?.parent?.parent!!))
+                findWyxdwz()
+            }
+            if (!stxxBoolean && stxx != null) {
+                recycle(mutableListOf(stxx?.parent?.parent!!))
+                findStxx()
+            }
+            if (!stxxscBoolean && stxxsc != null) {
+                recycle(mutableListOf(stxxsc?.parent?.parent!!))
+                findStxxsc()
+            }
+            if (!mrdtBoolean && mrdt != null) {
+                recycle(mutableListOf(mrdt?.parent?.parent!!))
+                findMrdt()
+            }
+            if (!mzdtBoolean && mzdt != null) {
+                recycle(mutableListOf(mzdt?.parent?.parent!!))
+                findMzdt()
+            }
+            if (!zxdtBoolean && zxdt != null) {
+                recycle(mutableListOf(zxdt?.parent?.parent!!))
+                findZxdt()
+            }
+            if (!tzdtBoolean && tzdt != null) {
+                recycle(mutableListOf(tzdt?.parent?.parent!!))
+                findTzdt()
+            }
+            if (!srsBoolean && srs != null) {
+                recycle(mutableListOf(srs?.parent?.parent!!))
+                findSrs()
+            }
+            if (!srdzBoolean && srdz != null) {
+                recycle(mutableListOf(srdz?.parent?.parent!!))
+                findSrdz()
+            }
+            if (!dyBoolean && dy != null) {
+                recycle(mutableListOf(dy?.parent?.parent!!))
+                findDy()
+            }
+            if (!fxBoolean && fx != null) {
+                recycle(mutableListOf(fx?.parent?.parent!!))
+                findFx()
+            }
+            if (!fbgdBoolean && fbgd != null) {
+                recycle(mutableListOf(fbgd?.parent?.parent!!))
+                findFbgd()
+            }
+            if (!bdpdBoolean && bdpd != null) {
+                recycle(mutableListOf(bdpd?.parent?.parent!!))
+                findBdpd()
+            }
+            if (!qgydBoolean && qgyd != null) {
+                recycle(mutableListOf(qgyd?.parent?.parent!!))
+                findQgyd()
+            }
+        }
+
+        //
+        if (qgydBoolean && !xxjfBack) {
+            performGlobalAction(GLOBAL_ACTION_BACK)
+            xxjfBack = true
+        }
+
         // 发表观点
-//        if (!fx) {
-//            val size =
-//                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id").size
-//            if (size > 0) {
-//                var b =
-//                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")[0].text
-//                Log.i(xue, "$b")
-//                var a =
-//                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")[0].parent.parent
-//                if (a.isClickable) {
-//                    a.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-//                }
-//            }
-//            fx = true
-//        }
-
-        // 如果积分AccessibilityNodeInfo存在则执行
-        if (jfBoolean) {
-            // 无论哪一个积分明细没拿到都执行
-            if (!dlBoolean or !wyxdwzBoolean or !stxxBoolean or !stxxscBoolean or !mrdtBoolean or !mzdtBoolean or !zxdtBoolean or !tzdtBoolean or !tzdtBoolean or !srsBoolean or !srdzBoolean or !dyBoolean or !fbgdBoolean or !bdpdBoolean or !qgydBoolean) {
-                // 点击积分进入积分明细
-                jf.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                // 查找webview_frame节点
-                val accessibilityNodeInfosRootInActiveWindow =
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame")
-                // 如果有则执行
-                if (accessibilityNodeInfosRootInActiveWindow.size > 0) {
-                    // 遍历
-                    (0 until accessibilityNodeInfosRootInActiveWindow.size).forEach { index ->
-                        Log.i(
-                            xue,
-                            "findByViewId->rootInActiveWindow->${index}->${accessibilityNodeInfosRootInActiveWindow[index].viewIdResourceName}"
-                        )
-                        // 遍历所有子节点
-                        recycle(mutableListOf(accessibilityNodeInfosRootInActiveWindow[index]))
-
-                        // 查找学习积分标题并赋值
-                        findXxjfBt()
+        // 分享
+        if (fbgdClick != null) {
+            if (fbgdClick!!.text == "去看看") {
+                val temp =
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
+                if (temp.size > 0) {
+                    if (temp[0].parent.parent.isClickable) {
+                        temp[0].parent.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                        Log.i(xue, "11")
                     }
                 }
-                // 查找学习积分明细
-                try {
-                    if (!dlBoolean) {
-                        recycle(mutableListOf(dl.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!wyxdwzBoolean) {
-                        recycle(mutableListOf(wyxdwz.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!stxxBoolean) {
-                        recycle(mutableListOf(stxx.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!stxxscBoolean) {
-                        recycle(mutableListOf(stxxsc.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!mrdtBoolean) {
-                        recycle(mutableListOf(mrdt.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-
-                try {
-                    if (!mzdtBoolean) {
-                        recycle(mutableListOf(mzdt.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!zxdtBoolean) {
-                        recycle(mutableListOf(zxdt.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!tzdtBoolean) {
-                        recycle(mutableListOf(tzdt.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!srsBoolean) {
-                        recycle(mutableListOf(srs.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!srdzBoolean) {
-                        recycle(mutableListOf(srdz.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!dyBoolean) {
-                        recycle(mutableListOf(dy.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!fxBoolean) {
-                        recycle(mutableListOf(fx.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!fbgdBoolean) {
-                        recycle(mutableListOf(fbgd.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!bdpdBoolean) {
-                        recycle(mutableListOf(bdpd.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-                try {
-                    if (!qgydBoolean) {
-                        recycle(mutableListOf(qgyd.parent.parent))
-                        findDl()
-                    }
-                } catch (e: Exception) {
-
-                }
-//                performGlobalAction(GLOBAL_ACTION_BACK)
             }
         }
-
     }
 
     override fun onInterrupt() {
@@ -417,19 +381,17 @@ class AccService : AccessibilityService() {
         // 临时可变List
         val mutableList: MutableList<AccessibilityNodeInfo> =
             mutableListOf()
-        try {
-            mani.forEach { ani ->
-                // 有子节点才进行添加操作
-                if (ani.childCount > 0) {
-                    (0 until ani.childCount).forEach { index ->
-                        // 同时添加
-                        mutableListAccessibilityNodeInfo.add(ani.getChild(index))
-                        mutableList.add(ani.getChild(index))
-                    }
+
+        // 开始遍历
+        mani.forEach { ani ->
+            // 有子节点才进行添加操作
+            if (ani.childCount > 0) {
+                (0 until ani.childCount).forEach { index ->
+                    // 同时添加
+                    mutableListAccessibilityNodeInfo.add(ani.getChild(index))
+                    mutableList.add(ani.getChild(index))
                 }
             }
-        } catch (e: Exception) {
-            Log.i(xue, "$e")
         }
 
         // 只循环临时可变List
@@ -464,20 +426,24 @@ class AccService : AccessibilityService() {
             }
         }
         mutableListAccessibilityNodeInfo.clear()
+        if (qgyd != null) {
+            xxjfBoolean = true
+        }
     }
 
     // 查找登录
     private fun findDl() {
+        Log.i(xue, dlText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     dlF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 dlClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -487,16 +453,17 @@ class AccService : AccessibilityService() {
 
     // 查找我要选读文章
     private fun findWyxdwz() {
+        Log.i(xue, wyxdwzText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     wyxdwzF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 wyxdwzClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -506,16 +473,17 @@ class AccService : AccessibilityService() {
 
     // 查找视听学习
     private fun findStxx() {
+        Log.i(xue, stxxText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     stxxF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 stxxClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -525,16 +493,17 @@ class AccService : AccessibilityService() {
 
     // 查找视听学习时长
     private fun findStxxsc() {
+        Log.i(xue, stxxscText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     stxxscF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 stxxscClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -544,16 +513,17 @@ class AccService : AccessibilityService() {
 
     // 查找每日答题
     private fun findMrdt() {
+        Log.i(xue, mrdtText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     mrdtF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 mrdtClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -563,16 +533,17 @@ class AccService : AccessibilityService() {
 
     // 查找每周答题
     private fun findMzdt() {
+        Log.i(xue, mzdtText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     mzdtF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 mzdtClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -582,16 +553,17 @@ class AccService : AccessibilityService() {
 
     // 查找专项答题
     private fun findZxdt() {
+        Log.i(xue, zxdtText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     zxdtF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 zxdtClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -601,16 +573,17 @@ class AccService : AccessibilityService() {
 
     // 查找挑战答题
     private fun findTzdt() {
+        Log.i(xue, tzdtText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     tzdtF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 tzdtClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -620,16 +593,17 @@ class AccService : AccessibilityService() {
 
     // 查找四人赛
     private fun findSrs() {
+        Log.i(xue, srsText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     srsF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 srsClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -639,16 +613,17 @@ class AccService : AccessibilityService() {
 
     // 查找双人对战
     private fun findSrdz() {
+        Log.i(xue, srdzText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     srdzF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 srdzClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -658,16 +633,17 @@ class AccService : AccessibilityService() {
 
     // 查找订阅
     private fun findDy() {
+        Log.i(xue, dyText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     dyF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 dyClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -677,16 +653,17 @@ class AccService : AccessibilityService() {
 
     // 查找分享
     private fun findFx() {
+        Log.i(xue, fxText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     fxF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 fxClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -696,16 +673,17 @@ class AccService : AccessibilityService() {
 
     // 查找发表观点
     private fun findFbgd() {
+        Log.i(xue, fbgdText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     fbgdF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 fbgdClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -715,16 +693,17 @@ class AccService : AccessibilityService() {
 
     // 查找本地频道
     private fun findBdpd() {
+        Log.i(xue, bdpdText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     bdpdF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 bdpdClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
@@ -734,16 +713,17 @@ class AccService : AccessibilityService() {
 
     // 查找强国运动
     private fun findQgyd() {
+        Log.i(xue, qgydText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     qgydF = ani
-                    Log.i(xue, "${ani.className}")
                     Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 qgydClick = ani
+                Log.i(xue, "${ani.text}")
             }
         }
         // 找到标记
