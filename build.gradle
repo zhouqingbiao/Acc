@@ -3,6 +3,7 @@ buildscript {
     ext.kotlin_version = '1.6.20'
     repositories {
         mavenCentral()
+        maven { url 'https://maven.aliyun.com/repository/google' }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
@@ -16,4 +17,10 @@ plugins {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+allprojects {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/google' }
+    }
 }
