@@ -31,6 +31,9 @@ class AccService : AccessibilityService() {
     // 确认
     var qr: AccessibilityNodeInfo? = null
 
+    // 分享到学习强国
+    var fxd: AccessibilityNodeInfo? = null
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         // 初始化
@@ -40,19 +43,20 @@ class AccService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
 
         if (rootInActiveWindow != null) {
-            // 发表观点 分享
+            // 点击需要发表观点和分享文章
             if (step == "开始") {
                 if (fbgdAndFx == null) {
                     val temp =
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
                     if (temp.size > 0) {
                         fbgdAndFx = temp[0].parent.parent
-                        fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                        step = "发表观点 分享"
+                        if (fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+                            step = "发表观点 分享"
+                        }
                     }
                 }
             }
-            // 发表观点 分享
+            // 拿到发表观点和分享控件
             if (step == "发表观点 分享") {
                 if (fbgd == null && fx == null) {
                     val temp =
@@ -64,9 +68,10 @@ class AccService : AccessibilityService() {
                     }
                 }
             }
+            // 点击发表观点控件
             if (step == "发表观点") {
                 fbgd?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                // 好观点将会被优先展示 发布
+                // 获取好观点将会被优先展示和发布控件
                 if (hgd == null && fb == null) {
                     recycle(mutableListOf(rootInActiveWindow))
                     findHgdAndFb()
@@ -75,6 +80,7 @@ class AccService : AccessibilityService() {
                     step = "好观点将会被优先展示"
                 }
             }
+            // 发布观点
             if (step == "好观点将会被优先展示") {
                 if (hgd != null && fb != null) {
                     val bundle = Bundle()
@@ -82,13 +88,14 @@ class AccService : AccessibilityService() {
                         AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
                         "学习强国！"
                     )
-                    hgd?.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
-                    if (fb?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                        step = "删除"
+                    if (hgd?.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle) == true) {
+                        if (fb?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+                            step = "删除"
+                        }
                     }
                 }
             }
-
+            // 删除观点
             if (step == "删除") {
                 if (sc == null) {
                     recycle(mutableListOf(rootInActiveWindow))
@@ -98,110 +105,67 @@ class AccService : AccessibilityService() {
                     }
                 }
             }
+            // 确认删除观点
             if (step == "确认") {
                 if (qr == null) {
                     val temp =
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("android:id/button1")
                     if (temp.size > 0) {
                         if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                            performGlobalAction(GLOBAL_ACTION_BACK)
+                            step = "开始分享第一次"
+                        }
+                    }
+                }
+            }
+            // 点击分享
+            if (step == "开始分享第一次") {
+                if (fx != null) {
+                    if (fx?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+                        step = "获取分享到控件第一次"
+                    }
+                }
+            }
+            if (step == "获取分享到控件第一次") {
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("分享到学习强国")
+                if (temp.size > 0) {
+                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        step = "返回第一次"
+                    }
+                }
+            }
+            if (step == "返回第一次") {
+                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        step = "开始分享第二次"
+                    }
+                }
+            }
+            // 点击分享
+            if (step == "开始分享第二次") {
+                if (fx != null) {
+                    if (fx?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+                        step = "获取分享到控件第二次"
+                    }
+                }
+            }
+            if (step == "获取分享到控件第二次") {
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("分享到学习强国")
+                if (temp.size > 0) {
+                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        step = "返回第二次"
+                    }
+                }
+            }
+            if (step == "返回第二次") {
+                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                            step = "开始视频"
                         }
                     }
                 }
             }
         }
-//        if (rootInActiveWindow != null) {
-//            // 发表观点 分享
-//            if (fbgdAndFx == null) {
-//                val temp =
-//                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
-//                if (temp.size > 0) {
-//                    fbgdAndFx = temp[0].parent.parent
-//                }
-//            }
-//            // 发表观点 分享
-//            if (fbgd == null && fx == null) {
-//                val temp =
-//                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/BOTTOM_LAYER_VIEW_ID")
-//                if (temp.size > 0) {
-//                    fbgd = temp[0].getChild(0)
-//                    fx = temp[0].getChild(3)
-//                }
-//            }
-//            // 确认
-//            if (qr == null) {
-//                val temp =
-//                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("android:id/button1")
-//                if (temp.size > 0) {
-//                    qr = temp[0]
-//                }
-//            }
-//        }
-//        if (step == "开始") {
-//            if (fbgdAndFx != null) {
-//                fbgdAndFx!!.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-//                if (fbgd != null && fx != null) {
-//                    step = "发表观点 分享"
-//                }
-//            }
-//        }
-//        if (step == "发表观点 分享") {
-//            if (fbgd != null) {
-//                fbgd!!.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-//            }
-//
-//            // 好观点将会被优先展示 发布
-//            if (hgd == null && fb == null) {
-//                recycle(mutableListOf(rootInActiveWindow))
-//                findHgdAndFb()
-//            }
-//
-//            if (hgd != null && fx != null) {
-//                step = "好观点将会被优先展示"
-//            }
-//        }
-
-//        if (step == "好观点将会被优先展示") {
-//            var aa = false
-//            if (hgd != null && fb != null) {
-//                val bundle = Bundle()
-//                bundle.putCharSequence(
-//                    AccessibilityNodeInfo
-//                        .ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "学习强国！"
-//                )
-//                hgd?.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
-//                aa = fb?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true
-//            }
-//
-//            if (aa) {
-//                // 删除
-//                if (sc == null) {
-//                    val temp =
-//                        rootInActiveWindow.findAccessibilityNodeInfosByText("删除")
-//                    if (temp.size > 0) {
-//                        sc = temp[0]
-//                    }
-//                }
-//
-//                if (sc != null) {
-//                    step = "删除"
-//                }
-//            }
-//
-//        }
-//        if (step == "删除") {
-//            if (sc != null) {
-//                sc?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-//            }
-//            if (qr != null) {
-//                step = "确认"
-//            }
-//        }
-//        if (step == "确认") {
-//            if (qr != null) {
-//                qr?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-//            }
-//        }
     }
 
     override fun onInterrupt() {
@@ -263,6 +227,20 @@ class AccService : AccessibilityService() {
             if (ani.text != null) {
                 when (ani.text) {
                     "删除" -> sc = ani
+                }
+            }
+        }
+        mutableListAccessibilityNodeInfo.clear()
+    }
+
+    /**
+     * 分享到学习强国
+     */
+    private fun findFx() {
+        mutableListAccessibilityNodeInfo.forEach { ani ->
+            if (ani.text != null) {
+                when (ani.text) {
+                    "分享到学习强国" -> fxd = ani
                 }
             }
         }
