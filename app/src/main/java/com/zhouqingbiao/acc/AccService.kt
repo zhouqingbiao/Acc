@@ -299,13 +299,18 @@ class AccService : AccessibilityService() {
             step = 8888
         }
 
+        if (rootInActiveWindow != null) {
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点")
+            if (temp.size > 0) {
+
+                hyButton = temp[0]
+
+                fxButton = hyButton?.parent?.getChild(3)
+            }
+        }
+
         if (step == 6 && fbgdClick?.text != "已完成") {
-
             fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-
-            hyButton = rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点")[0]
-
-            fxButton = hyButton?.parent?.getChild(3)
 
             if (hyButton != null) {
                 step = 7
@@ -313,15 +318,11 @@ class AccService : AccessibilityService() {
 
         } else if (step == 6 && fbgdClick?.text == "已完成") {
             fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-            hyButton = rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点")[0]
-
-            fxButton = hyButton?.parent?.getChild(3)
 
             if (hyButton != null) {
-                step = 1535
+                step = 10
             }
         }
-
 
         if (step == 7) {
             val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点")
@@ -359,6 +360,7 @@ class AccService : AccessibilityService() {
             performGlobalAction(GLOBAL_ACTION_BACK)
             step++
         }
+
         if (step == 12) {
             performGlobalAction(GLOBAL_ACTION_BACK)
         }
