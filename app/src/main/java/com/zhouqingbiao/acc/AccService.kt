@@ -16,42 +16,40 @@ class AccService : AccessibilityService() {
 
     // 积分
     private var jfViewId = "cn.xuexi.android:id/comm_head_xuexi_score"
-    private var jfBoolean = false
     private var jf: AccessibilityNodeInfo? = null
-    private var jfCount = 0
 
     // 本地
     private var bdText = "浙江"
-    private var bdBoolean = false
     private var bd: AccessibilityNodeInfo? = null
-    private var bdCount = 0
 
     // 发表观点&分享
     private var fbgdAndFxViewId = "cn.xuexi.android:id/general_card_title_id"
-    private var fbgdAndFxBoolean = false
     private var fbgdAndFx: AccessibilityNodeInfo? = null
-    private var fbgdAndFxCount = 0
+
+    // 欢迎发表你的观点
+    private var hyButton: AccessibilityNodeInfo? = null
+
+    // 分享
+    private var fxButton: AccessibilityNodeInfo? = null
+
+    // 好观点
+    private var hgd: AccessibilityNodeInfo? = null
+
+    // 发布
+    private var fb: AccessibilityNodeInfo? = null
 
     // 百灵
     private var blViewId = "cn.xuexi.android:id/home_bottom_tab_button_ding"
-    private var blBoolean = false
     private var bl: AccessibilityNodeInfo? = null
-    private var blCount = 0
 
     // 工作
     private var gzViewId = "cn.xuexi.android:id/home_bottom_tab_button_work"
-    private var gzBoolean = false
     private var gz: AccessibilityNodeInfo? = null
-    private var gzCount = 0
 
     // 学习积分
     private var xxjfViewId = "cn.xuexi.android:id/webview_frame"
-    private var xxjfBoolean = false
     private var xxjf: MutableList<AccessibilityNodeInfo> = mutableListOf()
-    private var xxjfBack = false
 
-    private var hgd: AccessibilityNodeInfo? = null
-    private var fb: AccessibilityNodeInfo? = null
 
     // ---------------------------------------------------------------------------------------------
 
@@ -167,76 +165,12 @@ class AccService : AccessibilityService() {
         super.onServiceConnected()
 
         // 初始化
-
         step = 1
-
-        // 积分
-        jfBoolean = false
-        jfCount = 0
-
-        // 本地
-        bdBoolean = false
-        bdCount = 0
-
-        // 百灵
-        blBoolean = false
-        blCount = 0
-
-        // 工作
-        gzBoolean = false
-        gzCount = 0
-
-        // -----------------------------------------------------------------------------------------
-
-        // 登录1分
-        dlBoolean = false
-
-        // 我要选读文章12分
-        wyxdwzBoolean = false
-
-        // 视听学习6分
-        stxxBoolean = false
-
-        // 视听学习时长6分
-        stxxscBoolean = false
-
-        // 每日答题5分
-        mrdtBoolean = false
-
-        // 每周答题5分
-        mzdtBoolean = false
-
-        // 专项答题10分
-        zxdtBoolean = false
-
-        // 挑战答题6分
-        tzdtBoolean = false
-
-        // 四人赛5分
-        srsBoolean = false
-
-        // 双人对战2分
-        srdzBoolean = false
-
-        // 订阅2分
-        dyBoolean = false
-
-        // 分享1分
-        fxBoolean = false
-
-        // 发表观点1分
-        fbgdBoolean = false
-
-        // 本地频道1分
-        bdpdBoolean = false
-
-        // 强国运动2分
-        qgydBoolean = false
 
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // 第一步 获取 积分 本地 发表观点&分享 百灵 工作
+        // 获取 积分 本地 发表观点&分享 百灵 工作
         if (step == 1) {
             if (rootInActiveWindow != null) {
                 // 积分
@@ -293,13 +227,13 @@ class AccService : AccessibilityService() {
             }
         }
 
-        // 第二步 点击积分进入学习积分
+        // 点击积分进入学习积分
         if (step == 2) {
             jf?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
             step = 3
         }
 
-        // 第三步 获取学习积分标题
+        // 获取学习积分标题
         if (step == 3) {
             // 查找webview_frame节点
             xxjf = rootInActiveWindow.findAccessibilityNodeInfosByViewId(xxjfViewId)
@@ -317,7 +251,7 @@ class AccService : AccessibilityService() {
             }
         }
 
-        // 第四步 获取学习积分明细
+        // 获取学习积分明细
         if (step == 4) {
             recycle(mutableListOf(dl?.parent?.parent!!))
             findDl()
@@ -361,21 +295,34 @@ class AccService : AccessibilityService() {
             step = 6
         }
 
-        if (step == 6) {
-            // 发表观点
-            // 分享
-            if (fbgdClick?.text == "去看看") {
-                fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                if (rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点").size > 0) {
-                    step = 7
-                }
-            } else {
-                fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                if (rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点").size > 0) {
-                    step = 7
-                }
+        if (step == 6 && fbgdClick?.text == "已完成" && fxClick?.text == "已完成") {
+            step = 8888
+        }
+
+        if (step == 6 && fbgdClick?.text != "已完成") {
+
+            fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+
+            hyButton = rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点")[0]
+
+            fxButton = hyButton?.parent?.getChild(3)
+
+            if (hyButton != null) {
+                step = 7
+            }
+
+        } else if (step == 6 && fbgdClick?.text == "已完成") {
+            fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            hyButton = rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点")[0]
+
+            fxButton = hyButton?.parent?.getChild(3)
+
+            if (hyButton != null) {
+                step = 1535
             }
         }
+
+
         if (step == 7) {
             val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("欢迎发表你的观点")
             if (temp.size > 0) {
@@ -390,32 +337,27 @@ class AccService : AccessibilityService() {
             }
         }
 
+        // 发布观点
         if (step == 8) {
-
             val bundle = Bundle()
             bundle.putCharSequence(
                 AccessibilityNodeInfo
-                    .ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "学习强国。"
+                    .ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "学习强国！"
             )
             hgd?.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
             fb?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
             step = 9
         }
-        // 删除暂时不做 2022年4月14日
+
+        // 删除观点 2022年4月14日
         if (step == 9) {
             step = 10
         }
+
         if (step >= 10 && step <= 11) {
-            val temp =
-                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/BOTTOM_LAYER_VIEW_ID")
-            Log.i(xue,"${temp[0].className}")
-            if (temp.size >1) {
-                if (temp[0].getChild(3).isClickable) {
-                    temp[0].getChild(3).performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                    performGlobalAction(GLOBAL_ACTION_BACK)
-                    step++
-                }
-            }
+            fxButton?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            performGlobalAction(GLOBAL_ACTION_BACK)
+            step++
         }
         if (step == 12) {
             performGlobalAction(GLOBAL_ACTION_BACK)
@@ -487,17 +429,14 @@ class AccService : AccessibilityService() {
 
     // 查找登录
     private fun findDl() {
-        Log.i(xue, dlText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     dlF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 dlClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -505,17 +444,14 @@ class AccService : AccessibilityService() {
 
     // 查找我要选读文章
     private fun findWyxdwz() {
-        Log.i(xue, wyxdwzText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     wyxdwzF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 wyxdwzClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -523,17 +459,14 @@ class AccService : AccessibilityService() {
 
     // 查找视听学习
     private fun findStxx() {
-        Log.i(xue, stxxText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     stxxF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 stxxClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -541,17 +474,14 @@ class AccService : AccessibilityService() {
 
     // 查找视听学习时长
     private fun findStxxsc() {
-        Log.i(xue, stxxscText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     stxxscF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 stxxscClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -559,17 +489,14 @@ class AccService : AccessibilityService() {
 
     // 查找每日答题
     private fun findMrdt() {
-        Log.i(xue, mrdtText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     mrdtF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 mrdtClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -577,17 +504,14 @@ class AccService : AccessibilityService() {
 
     // 查找每周答题
     private fun findMzdt() {
-        Log.i(xue, mzdtText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     mzdtF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 mzdtClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -595,17 +519,14 @@ class AccService : AccessibilityService() {
 
     // 查找专项答题
     private fun findZxdt() {
-        Log.i(xue, zxdtText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     zxdtF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 zxdtClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -613,17 +534,14 @@ class AccService : AccessibilityService() {
 
     // 查找挑战答题
     private fun findTzdt() {
-        Log.i(xue, tzdtText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     tzdtF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 tzdtClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -631,17 +549,14 @@ class AccService : AccessibilityService() {
 
     // 查找四人赛
     private fun findSrs() {
-        Log.i(xue, srsText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     srsF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 srsClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -649,17 +564,14 @@ class AccService : AccessibilityService() {
 
     // 查找双人对战
     private fun findSrdz() {
-        Log.i(xue, srdzText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     srdzF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 srdzClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -667,17 +579,14 @@ class AccService : AccessibilityService() {
 
     // 查找订阅
     private fun findDy() {
-        Log.i(xue, dyText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     dyF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 dyClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -685,17 +594,14 @@ class AccService : AccessibilityService() {
 
     // 查找分享
     private fun findFx() {
-        Log.i(xue, fxText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     fxF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 fxClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -703,17 +609,14 @@ class AccService : AccessibilityService() {
 
     // 查找发表观点
     private fun findFbgd() {
-        Log.i(xue, fbgdText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     fbgdF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 fbgdClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -721,17 +624,14 @@ class AccService : AccessibilityService() {
 
     // 查找本地频道
     private fun findBdpd() {
-        Log.i(xue, bdpdText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     bdpdF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 bdpdClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -739,17 +639,14 @@ class AccService : AccessibilityService() {
 
     // 查找强国运动
     private fun findQgyd() {
-        Log.i(xue, qgydText)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text.contains("已获")) {
                     qgydF = ani
-                    Log.i(xue, "${ani.text}")
                 }
             }
             if (ani.isClickable) {
                 qgydClick = ani
-                Log.i(xue, "${ani.text}")
             }
         }
         mutableListAccessibilityNodeInfo.clear()
@@ -766,87 +663,5 @@ class AccService : AccessibilityService() {
             }
         }
         mutableListAccessibilityNodeInfo.clear()
-    }
-
-    private fun findByText(text: String, event: AccessibilityEvent?) {
-
-        windows.forEach { accessibilityWindowInfo ->
-            val accessibilityNodeInfosRoot =
-                accessibilityWindowInfo.root.findAccessibilityNodeInfosByText(text)
-
-            if (accessibilityNodeInfosRoot.size > 0) {
-                (0 until accessibilityNodeInfosRoot.size).forEach { index ->
-                    Log.i(
-                        xue,
-                        "findByText->root->${index}->${accessibilityNodeInfosRoot[index].text}"
-                    )
-                }
-            }
-        }
-
-        val accessibilityNodeInfosRootInActiveWindow =
-            rootInActiveWindow.findAccessibilityNodeInfosByText(text)
-        if (accessibilityNodeInfosRootInActiveWindow.size > 0) {
-            (0 until accessibilityNodeInfosRootInActiveWindow.size).forEach { index ->
-                Log.i(
-                    xue,
-                    "findByText->rootInActiveWindow->${index}->${accessibilityNodeInfosRootInActiveWindow[index].text}"
-                )
-            }
-        }
-
-        val accessibilityNodeInfosSource = event?.source?.findAccessibilityNodeInfosByText(text)
-
-        if (accessibilityNodeInfosSource != null) {
-            if (accessibilityNodeInfosSource.size > 0) {
-                (0 until accessibilityNodeInfosSource.size).forEach { index ->
-                    Log.i(
-                        xue,
-                        "findByText->source->${index}->${accessibilityNodeInfosSource[index].text}"
-                    )
-                }
-            }
-        }
-    }
-
-    private fun findByViewId(viewId: String, event: AccessibilityEvent?) {
-
-        windows.forEach { accessibilityWindowInfo ->
-            val accessibilityNodeInfosRoot =
-                accessibilityWindowInfo.root.findAccessibilityNodeInfosByViewId(viewId)
-
-            if (accessibilityNodeInfosRoot.size > 0) {
-                (0 until accessibilityNodeInfosRoot.size).forEach { index ->
-                    Log.i(
-                        xue,
-                        "findByViewId->root->${index}->${accessibilityNodeInfosRoot[index].viewIdResourceName}"
-                    )
-                }
-            }
-        }
-
-        val accessibilityNodeInfosRootInActiveWindow =
-            rootInActiveWindow.findAccessibilityNodeInfosByViewId(viewId)
-        if (accessibilityNodeInfosRootInActiveWindow.size > 0) {
-            (0 until accessibilityNodeInfosRootInActiveWindow.size).forEach { index ->
-                Log.i(
-                    xue,
-                    "findByViewId->rootInActiveWindow->${index}->${accessibilityNodeInfosRootInActiveWindow[index].viewIdResourceName}"
-                )
-            }
-        }
-
-        val accessibilityNodeInfosSource = event?.source?.findAccessibilityNodeInfosByViewId(viewId)
-
-        if (accessibilityNodeInfosSource != null) {
-            if (accessibilityNodeInfosSource.size > 0) {
-                (0 until accessibilityNodeInfosSource.size).forEach { index ->
-                    Log.i(
-                        xue,
-                        "findByViewId->source->${index}->${accessibilityNodeInfosSource[index].viewIdResourceName}"
-                    )
-                }
-            }
-        }
     }
 }
