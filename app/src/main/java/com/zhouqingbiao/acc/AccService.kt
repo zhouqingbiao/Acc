@@ -14,7 +14,7 @@ import androidx.annotation.RequiresApi
 class AccService : AccessibilityService() {
 
     private var xue = "学"
-    private var step = "播放视频"
+    private var step = "点击工作"
 
     // 发表观点 分享
     var fbgdAndFx: AccessibilityNodeInfo? = null
@@ -42,13 +42,20 @@ class AccService : AccessibilityService() {
 
     // 视频次数
     var spcs = 0
+
+    // 工作
     var gz: AccessibilityNodeInfo? = null
+
+    // 本地
     var bd: AccessibilityNodeInfo? = null
+
+    // 文章次数
+    var wzcs = 0
 
     override fun onServiceConnected() {
         super.onServiceConnected()
         // 初始化
-        step = "播放视频"
+        step = "点击工作"
     }
 
 
@@ -284,7 +291,6 @@ class AccService : AccessibilityService() {
                     gz = temp[0]
                     if (gz?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
                         step = "开始本地"
-                        Log.i(xue, "工作")
                     }
                 }
             }
@@ -298,10 +304,73 @@ class AccService : AccessibilityService() {
                     if (temp.size > 0) {
                         bd = temp[0].parent
                         if (bd?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                            Log.i(xue, "浙江")
+                            step = "浙江卫视"
                         }
                     }
                 }
+            }
+        }
+        if (step == "浙江卫视") {
+            if (rootInActiveWindow != null) {
+                // 浙江卫视
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江卫视")
+                if (temp.size > 0) {
+                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        step = "看电视"
+                    }
+                }
+            }
+        }
+        if (step == "看电视") {
+            if (rootInActiveWindow != null) {
+                // 浙江卫视
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江卫视")
+                if (temp.size > 0) {
+                    step = "返回看电视"
+                }
+            }
+        }
+
+        if (step == "返回看电视") {
+            sleep(1000)
+            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                step = "浙江之声综合广播"
+            }
+        }
+        if (step == "浙江之声综合广播") {
+            sleep(1000)
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江之声综合广播")
+            if (temp.size > 0) {
+                if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        step = "阅读文章"
+                    }
+                }
+            }
+        }
+
+        if (step == "阅读文章" && wzcs <= 6) {
+            val temp =
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
+            if (temp.size > 0) {
+                if (temp[0].parent.parent.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    if (wzcs < 6) {
+                        sleep(8000)
+                        performGlobalAction(GLOBAL_ACTION_BACK)
+                        sleep(1000)
+                        rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].parent.performAction(
+                            AccessibilityNodeInfo.ACTION_CLICK
+                        )
+                        sleep(1000)
+                    } else {
+                        println("完成阅读时长")
+                        sleep(360000)
+                        performGlobalAction(GLOBAL_ACTION_BACK)
+                        sleep(1000)
+                    }
+                }
+                wzcs++
             }
         }
     }
