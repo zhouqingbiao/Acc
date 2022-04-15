@@ -14,7 +14,7 @@ import androidx.annotation.RequiresApi
 class AccService : AccessibilityService() {
 
     private var xue = "学"
-    private var step = "点击工作"
+    private var step = "点击积分"
 
     // 发表观点 分享
     var fbgdAndFx: AccessibilityNodeInfo? = null
@@ -52,10 +52,13 @@ class AccService : AccessibilityService() {
     // 文章次数
     var wzcs = 0
 
+    // 积分
+    private var jfViewId = "cn.xuexi.android:id/comm_head_xuexi_score"
+    private var jf: AccessibilityNodeInfo? = null
     override fun onServiceConnected() {
         super.onServiceConnected()
         // 初始化
-        step = "点击工作"
+        step = "点击积分"
     }
 
 
@@ -368,11 +371,45 @@ class AccService : AccessibilityService() {
                         sleep(360000)
                         performGlobalAction(GLOBAL_ACTION_BACK)
                         sleep(1000)
+                        step="点击积分"
                     }
                 }
                 wzcs++
             }
         }
+
+        // 点击积分
+        if (step == "点击积分"){
+            if (rootInActiveWindow!=null){
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_score")
+                if (temp.size>0){
+                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)){
+                        step = "开始答题"
+                    }
+                }
+            }
+        }
+        // 开始答题
+        if (step == "开始答题"){
+            if (rootInActiveWindow!=null){
+
+//                val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_score")
+//                if (temp.size>0){
+//                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)){
+//                        step = "开始答题"
+//                    }
+//                }
+            }
+        }
+        // wode
+//        cn.xuexi.android:id/comm_head_xuexi_mine
+        // 积分
+//        cn.xuexi.android:id/comm_head_xuexi_score
+        // 订阅
+//     cn.xuexi.android:id/my_subscribe_tv
+        // 我要答题
+//        cn.xuexi.android:id/user_item_name
+
     }
 
     override fun onInterrupt() {
