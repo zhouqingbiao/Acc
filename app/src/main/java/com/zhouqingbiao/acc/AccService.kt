@@ -404,30 +404,23 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "开始浙江卫视") {
-            if (bdpdClick?.text != "已完成") {
-                if (rootInActiveWindow != null) {
-                    val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江卫视")
-                    if (temp.size > 0) {
-                        if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                            step = "获取看电视控件"
-                        }
+            if (rootInActiveWindow != null) {
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江卫视")
+                if (temp.size > 0) {
+                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        step = "获取看电视控件"
                     }
                 }
-            }
-            if (bdpdClick?.text == "已完成") {
-                step = "开始浙江之声综合广播"
             }
         }
         if (step == "获取看电视控件") {
             if (rootInActiveWindow != null) {
-                // 浙江卫视
                 val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("看电视")
                 if (temp.size > 0) {
                     step = "返回本地"
                 }
             }
         }
-
         if (step == "返回本地") {
             sleep(1000)
             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
@@ -435,23 +428,17 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "开始浙江之声综合广播") {
-            if (stxxscClick?.text != "已完成") {
-                sleep(1000)
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江之声综合广播")
-                if (temp.size > 0) {
-                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(1000)
-                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                            step = "开始阅读文章"
-                        }
+            sleep(1000)
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江之声综合广播")
+            if (temp.size > 0) {
+                if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        step = "开始阅读文章"
                     }
                 }
             }
-            if (stxxscClick?.text == "已完成") {
-                step = "开始阅读文章"
-            }
         }
-
         if (step == "开始阅读文章" && wzcs <= 6) {
             if (wyxdwzClick?.text != "已完成") {
                 val temp =
