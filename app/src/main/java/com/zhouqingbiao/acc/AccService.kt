@@ -404,13 +404,18 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "开始浙江卫视") {
-            if (rootInActiveWindow != null) {
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江卫视")
-                if (temp.size > 0) {
-                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        step = "获取看电视控件"
+            if (bdpdClick?.text != "已完成") {
+                if (rootInActiveWindow != null) {
+                    val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江卫视")
+                    if (temp.size > 0) {
+                        if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                            step = "获取看电视控件"
+                        }
                     }
                 }
+            }
+            if (bdpdClick?.text == "已完成") {
+                step = "开始浙江之声综合广播"
             }
         }
         if (step == "获取看电视控件") {
@@ -430,15 +435,20 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "开始浙江之声综合广播") {
-            sleep(1000)
-            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江之声综合广播")
-            if (temp.size > 0) {
-                if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
-                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                        step = "开始阅读文章"
+            if (stxxscClick?.text != "已完成") {
+                sleep(1000)
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江之声综合广播")
+                if (temp.size > 0) {
+                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        sleep(1000)
+                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                            step = "开始阅读文章"
+                        }
                     }
                 }
+            }
+            if (stxxscClick?.text == "已完成") {
+                step = "开始阅读文章"
             }
         }
 
