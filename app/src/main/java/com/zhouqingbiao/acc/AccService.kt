@@ -453,43 +453,46 @@ class AccService : AccessibilityService() {
         }
 
         if (step == "开始阅读文章" && wzcs <= 6) {
-            val temp =
-                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
-            if (temp.size > 0) {
-                if (temp[0].parent.parent.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    if (wzcs < 6) {
-                        sleep(8000)
-                        performGlobalAction(GLOBAL_ACTION_BACK)
-                        sleep(1000)
-                        rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].parent.performAction(
-                            AccessibilityNodeInfo.ACTION_CLICK
-                        )
-                        sleep(1000)
-                    } else {
-                        sleep(360000)
-                        performGlobalAction(GLOBAL_ACTION_BACK)
-                        sleep(1000)
-                        step = "点击积分"
+            if (wyxdwzClick?.text != "已完成") {
+                val temp =
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
+                if (temp.size > 0) {
+                    if (temp[0].parent.parent.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        if (wzcs < 6) {
+                            sleep(8000)
+                            performGlobalAction(GLOBAL_ACTION_BACK)
+                            sleep(1000)
+                            rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].parent.performAction(
+                                AccessibilityNodeInfo.ACTION_CLICK
+                            )
+                            sleep(1000)
+                        } else {
+                            sleep(360000)
+                            performGlobalAction(GLOBAL_ACTION_BACK)
+                            sleep(1000)
+                            step = "开始答题"
+                        }
                     }
+                    wzcs++
                 }
-                wzcs++
+            }
+            if (wyxdwzClick?.text == "已完成") {
+                step = "开始答题"
             }
         }
-
-        // 点击积分
-        if (step == "点击积分") {
+        if (step == "开始答题") {
             if (rootInActiveWindow != null) {
                 val temp =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_score")
                 if (temp.size > 0) {
                     if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        step = "开始答题"
+                        step = "开始每日答题"
                     }
                 }
             }
         }
         // 开始答题
-        if (step == "开始答题") {
+        if (step == "开始每日答题") {
             if (rootInActiveWindow != null) {
 
 //                val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_score")
