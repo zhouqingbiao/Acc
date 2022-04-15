@@ -6,39 +6,93 @@ import android.graphics.Path
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock.sleep
-import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
 
 class AccService : AccessibilityService() {
+    private var step = "开始获取积分"
 
-    private var xue = "学"
-    private var step = "点击积分"
+    private var dl: AccessibilityNodeInfo? = null
+    private var dlF: AccessibilityNodeInfo? = null
+    private var dlClick: AccessibilityNodeInfo? = null
 
-    // 发表观点 分享
-    var fbgdAndFx: AccessibilityNodeInfo? = null
+    private var wyxdwz: AccessibilityNodeInfo? = null
+    private var wyxdwzF: AccessibilityNodeInfo? = null
+    private var wyxdwzClick: AccessibilityNodeInfo? = null
 
-    // 发表观点
-    var fbgd: AccessibilityNodeInfo? = null
+    private var stxx: AccessibilityNodeInfo? = null
+    private var stxxF: AccessibilityNodeInfo? = null
+    private var stxxClick: AccessibilityNodeInfo? = null
 
-    // 分享
-    var fx: AccessibilityNodeInfo? = null
+    private var stxxsc: AccessibilityNodeInfo? = null
+    private var stxxscF: AccessibilityNodeInfo? = null
+    private var stxxscClick: AccessibilityNodeInfo? = null
 
-    // 好观点
-    var hgd: AccessibilityNodeInfo? = null
+    private var mrdt: AccessibilityNodeInfo? = null
+    private var mrdtF: AccessibilityNodeInfo? = null
+    private var mrdtClick: AccessibilityNodeInfo? = null
 
-    // 发布
-    var fb: AccessibilityNodeInfo? = null
+    private var mzdt: AccessibilityNodeInfo? = null
+    private var mzdtF: AccessibilityNodeInfo? = null
+    private var mzdtClick: AccessibilityNodeInfo? = null
 
-    // 删除
-    var sc: AccessibilityNodeInfo? = null
+    private var zxdt: AccessibilityNodeInfo? = null
+    private var zxdtF: AccessibilityNodeInfo? = null
+    private var zxdtClick: AccessibilityNodeInfo? = null
 
-    // 确认
-    var qr: AccessibilityNodeInfo? = null
+    private var tzdt: AccessibilityNodeInfo? = null
+    private var tzdtF: AccessibilityNodeInfo? = null
+    private var tzdtClick: AccessibilityNodeInfo? = null
+
+    private var srs: AccessibilityNodeInfo? = null
+    private var srsF: AccessibilityNodeInfo? = null
+    private var srsClick: AccessibilityNodeInfo? = null
+
+    private var srdz: AccessibilityNodeInfo? = null
+    private var srdzF: AccessibilityNodeInfo? = null
+    private var srdzClick: AccessibilityNodeInfo? = null
+
+    private var dy: AccessibilityNodeInfo? = null
+    private var dyF: AccessibilityNodeInfo? = null
+    private var dyClick: AccessibilityNodeInfo? = null
+
+    private var fx: AccessibilityNodeInfo? = null
+    private var fxF: AccessibilityNodeInfo? = null
+    private var fxClick: AccessibilityNodeInfo? = null
+
+    private var fbgd: AccessibilityNodeInfo? = null
+    private var fbgdF: AccessibilityNodeInfo? = null
+    private var fbgdClick: AccessibilityNodeInfo? = null
+
+    private var bdpd: AccessibilityNodeInfo? = null
+    private var bdpdF: AccessibilityNodeInfo? = null
+    private var bdpdClick: AccessibilityNodeInfo? = null
+
+    private var qgyd: AccessibilityNodeInfo? = null
+    private var qgydF: AccessibilityNodeInfo? = null
+    private var qgydClick: AccessibilityNodeInfo? = null
+
+    // 欢迎发表你的观点控件
+    var hyfbndgdKj: AccessibilityNodeInfo? = null
+
+    // 分享控件
+    var fxKj: AccessibilityNodeInfo? = null
+
+    // 好观点将会被优先展示控件
+    var hgdjhbyxzsKj: AccessibilityNodeInfo? = null
+
+    // 发布控件
+    var fbKj: AccessibilityNodeInfo? = null
+
+    // 删除控件
+    var scKj: AccessibilityNodeInfo? = null
 
     // 分享到学习强国
-    var fxd: AccessibilityNodeInfo? = null
+    var fxdxxqg: AccessibilityNodeInfo? = null
+
+    // 分享次数
+    var fxcs = 0
 
     // 视频次数
     var spcs = 0
@@ -46,219 +100,261 @@ class AccService : AccessibilityService() {
     // 工作
     var gz: AccessibilityNodeInfo? = null
 
-    // 本地
-    var bd: AccessibilityNodeInfo? = null
-
     // 文章次数
     var wzcs = 0
 
     // 积分
     private var jfViewId = "cn.xuexi.android:id/comm_head_xuexi_score"
     private var jf: AccessibilityNodeInfo? = null
+
     override fun onServiceConnected() {
         super.onServiceConnected()
         // 初始化
-        step = "点击积分"
+        step = "开始获取积分"
     }
 
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // 点击需要发表观点和分享文章
-        if (step == "开始") {
+        if (step == "开始获取积分") {
             if (rootInActiveWindow != null) {
-                if (fbgdAndFx == null) {
+                val temp =
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_score")
+                if (temp.size > 0) {
+                    // 点击积分
+                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        step = "开始获取积分标题控件"
+                    }
+                }
+            }
+        }
+        if (step == "开始获取积分标题控件") {
+            if (rootInActiveWindow != null) {
+                val temp =
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame")
+                if (temp.size > 0) {
+                    // webview_frame必须循环获取
+                    recycle(temp)
+                    findXxjfBt()
+                    if (qgyd != null) {
+                        step = "开始获取积分明细控件"
+                    }
+                }
+            }
+        }
+        if (step == "开始获取积分明细控件") {
+            if (rootInActiveWindow != null) {
+                dlF = dl!!.parent.parent.getChild(2)
+                dlClick = dl!!.parent.parent.getChild(3)
+
+                wyxdwzF = wyxdwz!!.parent.parent.getChild(2)
+                wyxdwzClick = wyxdwz!!.parent.parent.getChild(3)
+
+                stxxF = stxx!!.parent.parent.getChild(2)
+                stxxClick = stxx!!.parent.parent.getChild(3)
+
+                stxxscF = stxxsc!!.parent.parent.getChild(2)
+                stxxscClick = stxxsc!!.parent.parent.getChild(3)
+
+                mrdtF = mrdt!!.parent.parent.getChild(2)
+                mrdtClick = mrdt!!.parent.parent.getChild(3)
+
+                mzdtF = mzdt!!.parent.parent.getChild(2)
+                mzdtClick = mzdt!!.parent.parent.getChild(3)
+
+                zxdtF = zxdt!!.parent.parent.getChild(2)
+                zxdtClick = zxdt!!.parent.parent.getChild(3)
+
+                tzdtF = tzdt!!.parent.parent.getChild(2)
+                tzdtClick = tzdt!!.parent.parent.getChild(3)
+
+                srsF = srs!!.parent.parent.getChild(2)
+                srsClick = srs!!.parent.parent.getChild(3)
+
+                srdzF = srdz!!.parent.parent.getChild(2)
+                srdzClick = srdz!!.parent.parent.getChild(3)
+
+                dyF = dy!!.parent.parent.getChild(2)
+                dyClick = dy!!.parent.parent.getChild(3)
+
+                fxF = fx!!.parent.parent.getChild(2)
+                fxClick = fx!!.parent.parent.getChild(3)
+
+                fbgdF = fbgd!!.parent.parent.getChild(2)
+                fbgdClick = fbgd!!.parent.parent.getChild(3)
+
+                bdpdF = bdpd!!.parent.parent.getChild(2)
+                bdpdClick = bdpd!!.parent.parent.getChild(3)
+
+                qgydF = qgyd!!.parent.parent.getChild(2)
+                qgydClick = qgyd!!.parent.parent.getChild(3)
+            }
+            if (qgydClick != null) {
+                performGlobalAction(GLOBAL_ACTION_BACK)
+                step = "开始发表观点"
+            }
+        }
+        if (step == "开始发表观点") {
+            if (fbgdClick?.text != "已完成" || fxClick?.text != "已完成") {
+                if (rootInActiveWindow != null) {
                     val temp =
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
                     if (temp.size > 0) {
-                        fbgdAndFx = temp[0].parent.parent
-                        if (fbgdAndFx?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                            step = "发表观点和分享"
+                        if (temp[0].parent.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                            step = "获取欢迎发表你的观点和分享控件"
                         }
                     }
                 }
             }
-        }
-        // 拿到发表观点和分享控件
-        if (step == "发表观点和分享") {
-            if (rootInActiveWindow != null) {
-                if (fbgd == null && fx == null) {
-                    val temp =
-                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/BOTTOM_LAYER_VIEW_ID")
-                    if (temp.size > 0) {
-                        fbgd = temp[0].getChild(0)
-                        fx = temp[0].getChild(3)
-                        step = "发表观点"
-                    }
-                }
+            if (fbgdClick?.text == "已完成" || fxClick?.text == "已完成") {
+                step = "开始视听学习"
             }
         }
-        // 点击发表观点控件
-        // 获取好观点将会被优先展示和发布控件
-        if (step == "发表观点") {
+        if (step == "获取欢迎发表你的观点和分享控件") {
             if (rootInActiveWindow != null) {
-                fbgd?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                // 获取好观点将会被优先展示和发布控件
-                if (hgd == null && fb == null) {
+                val temp =
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/BOTTOM_LAYER_VIEW_ID")
+                if (temp.size > 0) {
+                    hyfbndgdKj = temp[0].getChild(0)
+                    fxKj = temp[0].getChild(3)
+                    if (hyfbndgdKj != null && fxKj != null) {
+                        step = "获取好观点将会被优先展示和发布控件"
+                    }
+                }
+
+            }
+        }
+        if (step == "获取好观点将会被优先展示和发布控件") {
+            // 只能在此点击好观点将会被优先展示控件
+            hyfbndgdKj?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            if (rootInActiveWindow != null) {
+                if (hgdjhbyxzsKj == null && fbKj == null) {
                     recycle(mutableListOf(rootInActiveWindow))
                     findHgdAndFb()
                 }
-                if (hgd != null && fx != null) {
-                    step = "好观点将会被优先展示"
+                if (hgdjhbyxzsKj != null && fbKj != null) {
+                    step = "开始好观点将会被优先展示"
                 }
             }
         }
-        // 发布观点
-        if (step == "好观点将会被优先展示") {
+        if (step == "开始好观点将会被优先展示") {
             if (rootInActiveWindow != null) {
-                if (hgd != null && fb != null) {
-                    val bundle = Bundle()
-                    bundle.putCharSequence(
-                        AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
-                        "学习强国！"
-                    )
-                    if (hgd?.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle) == true) {
-                        if (fb?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                            step = "删除"
-                        }
+                val bundle = Bundle()
+                bundle.putCharSequence(
+                    AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                    "学习强国！"
+                )
+                if (hgdjhbyxzsKj?.performAction(
+                        AccessibilityNodeInfo.ACTION_SET_TEXT,
+                        bundle
+                    ) == true
+                ) {
+                    if (fbKj?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+                        step = "开始删除"
                     }
                 }
             }
         }
-        // 删除观点
-        if (step == "删除") {
+        if (step == "开始删除") {
             if (rootInActiveWindow != null) {
-                if (sc == null) {
+                if (scKj == null) {
                     recycle(mutableListOf(rootInActiveWindow))
                     findSc()
-                    if (sc?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                        step = "确认"
+                    if (scKj?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+                        step = "开始确认"
                     }
                 }
             }
         }
-        // 确认删除观点
-        if (step == "确认") {
+        if (step == "开始确认") {
             if (rootInActiveWindow != null) {
-                if (qr == null) {
-                    val temp =
-                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("android:id/button1")
-                    if (temp.size > 0) {
-                        if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                            step = "开始分享第一次"
+                val temp =
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("android:id/button1")
+                if (temp.size > 0) {
+                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        step = "开始分享"
+                    }
+                }
+            }
+        }
+        if (step == "开始分享" && fxcs <= 2) {
+            if (rootInActiveWindow != null) {
+                if (fxKj?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+                    step = "获取分享到学习强国控件"
+                }
+            }
+        }
+        if (step == "获取分享到学习强国控件") {
+            if (rootInActiveWindow != null) {
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("分享到学习强国")
+                if (temp.size > 0) {
+                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        step = "获取选择联系人控件"
+                    }
+                }
+            }
+        }
+        if (step == "获取选择联系人控件") {
+            if (rootInActiveWindow != null) {
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("选择联系人")
+                if (temp.size > 0) {
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        fxcs++
+                        if (fxcs == 1) {
+                            step = "开始分享"
+                        }
+                        if (fxcs == 2) {
+                            step = "返回工作"
                         }
                     }
                 }
             }
         }
-        // 开始分享第一次
-        if (step == "开始分享第一次") {
-            if (rootInActiveWindow != null) {
-                if (fx != null) {
-                    if (fx?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                        step = "获取分享到控件第一次"
-                    }
-                }
-            }
-        }
-        // 点击分享到控件第一次
-        if (step == "获取分享到控件第一次") {
-            if (rootInActiveWindow != null) {
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("分享到学习强国")
-                if (temp.size > 0) {
-                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        step = "选择联系人第一次"
-                    }
-                }
-            }
-        }
-        // 返回第一次
-        if (step == "选择联系人第一次") {
-            if (rootInActiveWindow != null) {
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("选择联系人")
-                if (temp.size > 0) {
-                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                        step = "开始分享第二次"
-                    }
-                }
-            }
-        }
-        // 开始分享第二次
-        if (step == "开始分享第二次") {
-            if (rootInActiveWindow != null) {
-                if (fx != null) {
-                    if (fx?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                        step = "获取分享到控件第二次"
-                    }
-                }
-            }
-        }
-        // 点击分享到控件第二次
-        if (step == "获取分享到控件第二次") {
-            if (rootInActiveWindow != null) {
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("分享到学习强国")
-                if (temp.size > 0) {
-                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        step = "选择联系人第二次"
-                    }
-                }
-            }
-        }
-        // 返回第二次
-        if (step == "选择联系人第二次") {
-            if (rootInActiveWindow != null) {
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("选择联系人")
-                if (temp.size > 0) {
-                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                        step = "返回主页"
-                    }
-                }
-            }
-        }
-        // 返回主页
-        if (step == "返回主页") {
+        if (step == "返回工作") {
             if (rootInActiveWindow != null) {
                 val temp =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/BOTTOM_LAYER_VIEW_ID")
                 if (temp.size > 0) {
                     if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                        step = "开始视频"
+                        step = "开始视听学习"
                     }
                 }
             }
         }
-        // 开始视频
-        if (step == "开始视频") {
-            if (rootInActiveWindow != null) {
-                val temp =
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_ding")
-                if (temp.size > 0) {
-                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        step = "播放视频"
+        if (step == "开始视听学习") {
+            if (stxxClick?.text != "已完成") {
+                if (rootInActiveWindow != null) {
+                    val temp =
+                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_ding")
+                    if (temp.size > 0) {
+                        if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                            step = "开始播放视听"
+                        }
                     }
                 }
             }
+            if (stxxClick?.text == "已完成") {
+                step = "开始本地频道"
+            }
         }
-        // 播放视频
-        if (step == "播放视频") {
+        if (step == "开始播放视听") {
             if (rootInActiveWindow != null) {
                 val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("推荐")
                 if (temp.size > 0) {
+                    println(temp.size)
                     val temp1 = temp[1].parent.parent.parent.parent
                     val temp2 = temp1.getChild(1).getChild(0).getChild(0).getChild(1)
                     val temp3 = temp2.getChild(0).getChild(0).getChild(1).getChild(0)
-                    val temp4 = temp3.getChild(0).getChild(1).getChild(0)
+                    val temp4 = temp3.getChild(1).getChild(1).getChild(0)
                     if (temp4.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        step = "滑动视频"
+                        step = "开始视听次数"
                     }
                 }
             }
         }
-        // 滑动视频
         @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "滑动视频" && spcs <= 6) {
+        if (step == "开始视听次数" && spcs <= 6) {
             sleep(8000)
             spcs++
-            Log.i(xue, "$spcs")
             if (spcs < 6) {
                 val builder = GestureDescription.Builder()
 
@@ -286,74 +382,67 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "点击工作") {
-            // 工作
             if (gz == null) {
                 val temp =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_work")
                 if (temp.size > 0) {
                     gz = temp[0]
                     if (gz?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                        step = "开始本地"
-                    }
-                }
-            }
-
-        }
-        if (step == "开始本地") {
-            if (rootInActiveWindow != null) {
-                // 本地
-                if (bd == null) {
-                    val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")
-                    if (temp.size > 0) {
-                        bd = temp[0].parent
-                        if (bd?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                            step = "浙江卫视"
-                        }
+                        step = "开始本地频道"
                     }
                 }
             }
         }
-        if (step == "浙江卫视") {
+        if (step == "开始本地频道") {
             if (rootInActiveWindow != null) {
-                // 浙江卫视
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")
+                if (temp.size > 0) {
+                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        step = "开始浙江卫视"
+                    }
+                }
+            }
+        }
+        if (step == "开始浙江卫视") {
+            if (rootInActiveWindow != null) {
                 val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江卫视")
                 if (temp.size > 0) {
                     if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        step = "看电视"
+                        step = "获取看电视控件"
                     }
                 }
             }
         }
-        if (step == "看电视") {
+        if (step == "获取看电视控件") {
             if (rootInActiveWindow != null) {
                 // 浙江卫视
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江卫视")
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("看电视")
                 if (temp.size > 0) {
-                    step = "返回看电视"
+                    step = "返回本地"
                 }
             }
         }
 
-        if (step == "返回看电视") {
+        if (step == "返回本地") {
             sleep(1000)
             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                step = "浙江之声综合广播"
+                step = "开始浙江之声综合广播"
             }
         }
-        if (step == "浙江之声综合广播") {
+        if (step == "开始浙江之声综合广播") {
             sleep(1000)
             val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江之声综合广播")
             if (temp.size > 0) {
                 if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     sleep(1000)
                     if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                        step = "阅读文章"
+                        step = "开始阅读文章"
                     }
                 }
             }
         }
 
-        if (step == "阅读文章" && wzcs <= 6) {
+        if (step == "开始阅读文章" && wzcs <= 6) {
             val temp =
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
             if (temp.size > 0) {
@@ -367,11 +456,10 @@ class AccService : AccessibilityService() {
                         )
                         sleep(1000)
                     } else {
-                        println("完成阅读时长")
                         sleep(360000)
                         performGlobalAction(GLOBAL_ACTION_BACK)
                         sleep(1000)
-                        step="点击积分"
+                        step = "点击积分"
                     }
                 }
                 wzcs++
@@ -379,19 +467,20 @@ class AccService : AccessibilityService() {
         }
 
         // 点击积分
-        if (step == "点击积分"){
-            if (rootInActiveWindow!=null){
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_score")
-                if (temp.size>0){
-                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)){
+        if (step == "点击积分") {
+            if (rootInActiveWindow != null) {
+                val temp =
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_score")
+                if (temp.size > 0) {
+                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                         step = "开始答题"
                     }
                 }
             }
         }
         // 开始答题
-        if (step == "开始答题"){
-            if (rootInActiveWindow!=null){
+        if (step == "开始答题") {
+            if (rootInActiveWindow != null) {
 
 //                val temp = rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_score")
 //                if (temp.size>0){
@@ -449,14 +538,27 @@ class AccService : AccessibilityService() {
     }
 
     /**
-     * 好观点将会被优先展示 发布
+     * 查找学习积分标题并赋值
      */
-    private fun findHgdAndFb() {
+    private fun findXxjfBt() {
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 when (ani.text) {
-                    "好观点将会被优先展示" -> hgd = ani
-                    "发布" -> fb = ani
+                    "登录" -> dl = ani
+                    "我要选读文章" -> wyxdwz = ani
+                    "视听学习" -> stxx = ani
+                    "视听学习时长" -> stxxsc = ani
+                    "每日答题" -> mrdt = ani
+                    "每周答题" -> mzdt = ani
+                    "专项答题" -> zxdt = ani
+                    "挑战答题" -> tzdt = ani
+                    "四人赛" -> srs = ani
+                    "双人对战" -> srdz = ani
+                    "订阅" -> dy = ani
+                    "分享" -> fx = ani
+                    "发表观点" -> fbgd = ani
+                    "本地频道" -> bdpd = ani
+                    "强国运动" -> qgyd = ani
                 }
             }
         }
@@ -464,16 +566,49 @@ class AccService : AccessibilityService() {
     }
 
     /**
-     * 删除
+     * 获取好观点将会被优先展示和发布控件
+     */
+    private fun findHgdAndFb() {
+        mutableListAccessibilityNodeInfo.forEach { ani ->
+            if (ani.text != null) {
+                when (ani.text) {
+                    "好观点将会被优先展示" -> hgdjhbyxzsKj = ani
+                    "发布" -> fbKj = ani
+                }
+            }
+        }
+        mutableListAccessibilityNodeInfo.clear()
+    }
+
+    /**
+     * 获取删除控件
      */
     private fun findSc() {
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 when (ani.text) {
-                    "删除" -> sc = ani
+                    "删除" -> scKj = ani
                 }
             }
         }
         mutableListAccessibilityNodeInfo.clear()
+    }
+
+    /**
+     * 根据字符串查找控件
+     */
+    private fun findByString(
+        mutableList: MutableList<AccessibilityNodeInfo>,
+        string: String
+    ): AccessibilityNodeInfo? {
+        recycle(mutableList)
+        mutableListAccessibilityNodeInfo.forEach { ani ->
+            if (ani.text != null) {
+                if (ani.text == string) {
+                    return ani
+                }
+            }
+        }
+        return null
     }
 }
