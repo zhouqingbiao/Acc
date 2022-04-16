@@ -543,11 +543,23 @@ class AccService : AccessibilityService() {
             onDispatchGesture(530F, 1880F, 0F, 0F, 50, 50)
             step = "选择四人赛答案"
         }
-        // 不能使用手势了
+        // 不能使用手势了 也不能使用find了
         @RequiresApi(Build.VERSION_CODES.N)
         if (step == "选择四人赛答案") {
-            sleep(2000)
-            onDispatchGesture(530F, 930F, 0F, 0F, 50, 50)
+            sleep(3000)
+            // onDispatchGesture(530F, 930F, 0F, 0F, 50, 50)
+            recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
+            val mutableList: MutableList<AccessibilityNodeInfo> = mutableListOf()
+            mutableListAccessibilityNodeInfo.forEach { ani ->
+                if (ani.isClickable) {
+                    mutableList.add(ani)
+                }
+            }
+            (0 until mutableList.size).forEach { index ->
+                if (index == 0) {
+                    mutableList[index].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                }
+            }
             step = "选择四人赛答案"
         }
         @RequiresApi(Build.VERSION_CODES.N)
