@@ -10,7 +10,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
 
-class AccService : AccessibilityService() {
+class Acc2Service : AccessibilityService() {
     private var step = "开始获取积分"
 
     private var ywc = "已完成"

@@ -394,13 +394,18 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "开始本地频道") {
-            if (rootInActiveWindow != null) {
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")
-                if (temp.size > 0) {
-                    if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        step = "开始浙江卫视"
+            if (bdpdClick?.text != ywc || stxxscClick?.text != ywc || wyxdwzClick?.text != ywc) {
+                if (rootInActiveWindow != null) {
+                    val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")
+                    if (temp.size > 0) {
+                        if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                            step = "开始浙江卫视"
+                        }
                     }
                 }
+            }
+            if (bdpdClick?.text == ywc && stxxscClick?.text == ywc && wyxdwzClick?.text == ywc) {
+                step = "再次进入积分"
             }
         }
         if (step == "开始浙江卫视") {
@@ -479,37 +484,128 @@ class AccService : AccessibilityService() {
                 if (temp.size > 0) {
                     if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                         temp[0].contentDescription
-                        step = "获取每日答题"
+                        step = "滑动到答题和订阅"
                     }
                 }
             }
         }
-        if (step == "获取每日答题") {
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "滑动到答题和订阅") {
             sleep(1000)
-            if (rootInActiveWindow != null) {
-                recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
-                findXxjfBt()
-                if (qgyd != null) {
-                    step = "进入每日答题"
-                }
+            onDispatchGesture(555F, 2200F, 555F, 230F, 50, 2000)
+            step = "进入每日答题"
+            step = "进入每周答题"
+            step = "进入专项答题"
+            step = "进入挑战答题"
+            step = "进入四人赛"
+//            step = "进入双人对战"
+//            step = "进入订阅"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "进入每日答题") {
+            sleep(3000)
+            onDispatchGesture(950F, 330F, 0F, 0F, 50, 50)
+            step = "111111"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "进入每周答题") {
+            sleep(3000)
+            onDispatchGesture(950F, 630F, 0F, 0F, 50, 50)
+            step = "111111"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "进入专项答题") {
+            sleep(3000)
+            onDispatchGesture(950F, 890F, 0F, 0F, 50, 50)
+            step = "111111"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "进入挑战答题") {
+            sleep(3000)
+            onDispatchGesture(950F, 1150F, 0F, 0F, 50, 50)
+            step = "111111"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "进入四人赛") {
+            sleep(3000)
+            onDispatchGesture(950F, 1480F, 0F, 0F, 50, 50)
+            step = "点击进入比赛"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "点击进入比赛") {
+            sleep(1000)
+            onDispatchGesture(530F, 1880F, 0F, 0F, 50, 50)
+            step = "点击开始比赛"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "点击开始比赛") {
+            sleep(5000)
+            onDispatchGesture(530F, 1880F, 0F, 0F, 50, 50)
+            step = "选择四人赛答案"
+        }
+        // 不能使用手势了
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "选择四人赛答案") {
+            sleep(2000)
+            onDispatchGesture(530F, 930F, 0F, 0F, 50, 50)
+            step = "选择四人赛答案"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "进入双人对战") {
+            sleep(3000)
+            onDispatchGesture(950F, 1830F, 0F, 0F, 50, 50)
+            step = "111111"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "进入订阅") {
+            sleep(3000)
+            if (dyF?.text == "已获0分/每日上限2分" || dyF?.text == "已获1分/每日上限2分") {
+                onDispatchGesture(950F, 2120F, 0F, 0F, 50, 50)
+                step = "点击强国号上新"
+            }
+            if (dyF?.text == "已获2分/每日上限2分") {
+                step = "结束"
+                println(step)
             }
         }
-        if (step == "进入每日答题") {
-            try {
-                sleep(2000)
-                if (rootInActiveWindow != null) {
-                    if (mrdt != null) {
-                        mrdtClick = mrdt!!.parent.parent.getChild(3)
-                        if (mrdtClick != null) {
-                            if (mrdtClick?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                                step = "获取题目"
-                            }
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "点击强国号上新") {
+            sleep(1000)
+            onDispatchGesture(140F, 480F, 0F, 0F, 50, 50)
+            step = "点击强国号上新订阅"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "点击强国号上新订阅") {
+            sleep(1000)
+            onDispatchGesture(980F, 340F, 0F, 0F, 50, 50)
+            step = "点击地方平台"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "点击地方平台") {
+            step = if (dyF?.text == "已获0分/每日上限2分") {
+                sleep(1000)
+                onDispatchGesture(650F, 180F, 0F, 0F, 50, 50)
+                "点击地方平台上新"
+            } else {
+                "从订阅返回积分学习"
             }
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "点击地方平台上新") {
+            sleep(1000)
+            onDispatchGesture(140F, 480F, 0F, 0F, 50, 50)
+            step = "点击地方平台上新订阅"
+        }
+        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "点击地方平台上新订阅") {
+            sleep(1000)
+            onDispatchGesture(980F, 340F, 0F, 0F, 50, 50)
+            step = "从订阅返回积分学习"
+        }
+        if (step == "从订阅返回积分学习") {
+            sleep(1000)
+            performGlobalAction(GLOBAL_ACTION_BACK)
+            step = "结束"
         }
 
         if (step == "获取题目") {
@@ -589,6 +685,45 @@ class AccService : AccessibilityService() {
             }
         }
         mutableListAccessibilityNodeInfo.clear()
+    }
+
+    /**
+     * dispatchGesture
+     */
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun onDispatchGesture(
+        moveToX: Float,
+        moveToY: Float,
+        lineToX: Float,
+        lineToY: Float,
+        startTime: Long,
+        duration: Long
+    ) {
+        // 创建一个手势
+        val path = Path()
+        // 如果是点击/双击手势
+        path.moveTo(moveToX, moveToY)
+        // 如果是移动/快速手势
+        if (lineToX != 0F && lineToY != 0F) {
+            path.lineTo(lineToX, lineToY)
+        }
+        // startTime 手势开始的时间延迟 毫秒
+        // duration 手势持续的时间 毫秒
+        // 如果需要快速滑动效果 duration 设置成一个小值
+        val stroke = GestureDescription.StrokeDescription(path, startTime, duration)
+        // 手势执行回调
+        val gestureResultCallback =
+            object : AccessibilityService.GestureResultCallback() {
+                override fun onCompleted(gestureDescription: GestureDescription?) {
+                }
+
+                override fun onCancelled(gestureDescription: GestureDescription?) {
+                }
+            }
+        // 声明一个构造器
+        val builder = GestureDescription.Builder()
+        builder.addStroke(stroke)
+        dispatchGesture(builder.build(), gestureResultCallback, null)
     }
 
     /**
