@@ -489,18 +489,41 @@ class AccService : AccessibilityService() {
             if (rootInActiveWindow != null) {
                 recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
                 findXxjfBt()
-                if (mrdt != null) {
+                if (qgyd != null) {
                     step = "进入每日答题"
                 }
             }
         }
         if (step == "进入每日答题") {
-            mrdtClick = mrdt!!.parent.parent.getChild(3)
-            if (mrdtClick != null) {
-                if (mrdtClick?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+            try {
+                sleep(2000)
+                if (rootInActiveWindow != null) {
+                    if (mrdt != null) {
+                        mrdtClick = mrdt!!.parent.parent.getChild(3)
+                        if (mrdtClick != null) {
+                            if (mrdtClick?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+                                step = "获取题目"
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
 
+            }
+        }
+
+        if (step == "获取题目") {
+            sleep(1000)
+            recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
+            mutableListAccessibilityNodeInfo.forEach { ani ->
+                if (ani.text != null) {
+                    val temp = ani.text.toString()
+                    if (temp.indexOf("/5", 0, false) == -1) {
+                        println(ani.text)
+                    }
                 }
             }
+            step = "获取题目111"
         }
     }
 
@@ -608,6 +631,7 @@ class AccService : AccessibilityService() {
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.contentDescription != null) {
                 if (ani.contentDescription == contentDescription) {
+                    mutableListAccessibilityNodeInfo.clear()
                     return ani
                 }
             }
@@ -626,6 +650,7 @@ class AccService : AccessibilityService() {
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
                 if (ani.text == text) {
+                    mutableListAccessibilityNodeInfo.clear()
                     return ani
                 }
             }
