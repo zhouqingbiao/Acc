@@ -17,6 +17,36 @@ import java.util.concurrent.Executor
 
 @RequiresApi(Build.VERSION_CODES.N)
 class AccService : AccessibilityService() {
+    val tessBaseAPI = TessBaseAPI()
+
+    private var threadTessBaseAPI = Thread {
+        var mBitmap: Bitmap?
+        val takeScreenshotCallback =
+            @RequiresApi(Build.VERSION_CODES.R)
+            object : TakeScreenshotCallback {
+                override fun onSuccess(p0: ScreenshotResult) {
+                    println("Success")
+                    val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
+                    mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
+                    println(mBitmap != null)
+                    if (mBitmap != null) {
+                        tessBaseAPI.setImage(mBitmap)
+                        println(tessBaseAPI.utF8Text)
+                    }
+                }
+
+                override fun onFailure(p0: Int) {
+                }
+            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            takeScreenshot(
+                Display.DEFAULT_DISPLAY,
+                applicationContext.mainExecutor,
+                takeScreenshotCallback
+            )
+        }
+    }
+
     private var step = "开始获取积分"
 
     private var ywc = "已完成"
@@ -113,7 +143,10 @@ class AccService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+
         // 初始化
+        tessBaseAPI.init(filesDir.path, "chi_sim")
+
         step = "开始获取积分"
     }
 
@@ -194,6 +227,7 @@ class AccService : AccessibilityService() {
             if (qgydClick != null) {
                 performGlobalAction(GLOBAL_ACTION_BACK)
                 step = "开始发表观点"
+                step = "进入我的"
             }
         }
         if (step == "开始发表观点") {
@@ -324,7 +358,7 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "开始视听学习") {
-            if (stxxClick?.text == ywc) {
+            if (stxxClick?.text != ywc) {
                 if (rootInActiveWindow != null) {
                     val temp =
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_ding")
@@ -492,32 +526,6 @@ class AccService : AccessibilityService() {
                     }
                 }
             }
-//            TessBaseAPI().init("chi_sim","chi_sim")
-//            val takeScreenshotCallback =
-//                @RequiresApi(Build.VERSION_CODES.R)
-//                object : TakeScreenshotCallback {
-//                    override fun onSuccess(p0: ScreenshotResult) {
-//                        val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
-//                        try {
-//                            if (bitmap != null) {
-//                                println(bitmap.toString())
-//                            }
-//                        } catch (e: Exception) {
-//
-//                        }
-//
-//                    }
-//
-//                    override fun onFailure(p0: Int) {
-//                    }
-//                }
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-//                takeScreenshot(
-//                    Display.DEFAULT_DISPLAY,
-//                    applicationContext.mainExecutor,
-//                    takeScreenshotCallback
-//                )
-//            }
         }
         if (step == "点击订阅") {
             sleep(1000)
@@ -583,6 +591,8 @@ class AccService : AccessibilityService() {
             sleep(1000)
             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                 onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+                threadTessBaseAPI.start()
+                sleep(5000)
                 step = "进入每周答题"
             }
         }
