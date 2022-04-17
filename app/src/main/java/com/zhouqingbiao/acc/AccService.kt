@@ -2,13 +2,18 @@ package com.zhouqingbiao.acc
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
+import android.graphics.Bitmap
 import android.graphics.Path
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock.sleep
+import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
+import java.io.File
+import java.io.FileOutputStream
+import java.util.concurrent.Executor
 
 
 @RequiresApi(Build.VERSION_CODES.N)
@@ -484,11 +489,37 @@ class AccService : AccessibilityService() {
             if (rootInActiveWindow != null) {
                 val temp =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_mine")
-                if (temp.size > 0) {
-                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        step = "点击订阅"
+//                if (temp.size > 0) {
+//                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+//                        step = "点击订阅"
+//                    }
+//                }
+            }
+            val takeScreenshotCallback =
+                @RequiresApi(Build.VERSION_CODES.R)
+                object : TakeScreenshotCallback {
+                    override fun onSuccess(p0: ScreenshotResult) {
+                        val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
+                        val file =
+                            File(filesDir, "test.png")
+                        if (!file.exists()) {
+                            file.createNewFile()
+                        }
+                        val fos = FileOutputStream(file)
+                        bitmap?.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                        fos.flush()
+                        fos.close()
+                    }
+
+                    override fun onFailure(p0: Int) {
                     }
                 }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                takeScreenshot(
+                    Display.DEFAULT_DISPLAY,
+                    applicationContext.mainExecutor,
+                    takeScreenshotCallback
+                )
             }
         }
         if (step == "点击订阅") {
@@ -647,6 +678,14 @@ class AccService : AccessibilityService() {
     override fun onInterrupt() {
     }
 
+    override fun takeScreenshot(
+        displayId: Int,
+        executor: Executor,
+        callback: TakeScreenshotCallback
+    ) {
+        super.takeScreenshot(displayId, executor, callback)
+    }
+
     // 正式可变List
     private var mutableListAccessibilityNodeInfo: MutableList<AccessibilityNodeInfo> =
         mutableListOf()
@@ -711,7 +750,7 @@ class AccService : AccessibilityService() {
     /**
      * dispatchGesture
      */
-    fun onDispatchGesture(
+    private fun onDispatchGesture(
         moveToX: Float,
         moveToY: Float,
         lineToX: Float,
@@ -733,7 +772,7 @@ class AccService : AccessibilityService() {
         val stroke = GestureDescription.StrokeDescription(path, startTime, duration)
         // 手势执行回调
         val gestureResultCallback =
-            object : AccessibilityService.GestureResultCallback() {
+            object : GestureResultCallback() {
                 override fun onCompleted(gestureDescription: GestureDescription?) {
                 }
 
