@@ -11,8 +11,7 @@ import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
-import java.io.File
-import java.io.FileOutputStream
+import com.googlecode.tesseract.android.TessBaseAPI
 import java.util.concurrent.Executor
 
 
@@ -195,8 +194,6 @@ class AccService : AccessibilityService() {
             if (qgydClick != null) {
                 performGlobalAction(GLOBAL_ACTION_BACK)
                 step = "开始发表观点"
-                // 断点 记得删除
-                step = "进入我的"
             }
         }
         if (step == "开始发表观点") {
@@ -489,38 +486,38 @@ class AccService : AccessibilityService() {
             if (rootInActiveWindow != null) {
                 val temp =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_mine")
-//                if (temp.size > 0) {
-//                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-//                        step = "点击订阅"
-//                    }
-//                }
-            }
-            val takeScreenshotCallback =
-                @RequiresApi(Build.VERSION_CODES.R)
-                object : TakeScreenshotCallback {
-                    override fun onSuccess(p0: ScreenshotResult) {
-                        val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
-                        val file =
-                            File(filesDir, "test.png")
-                        if (!file.exists()) {
-                            file.createNewFile()
-                        }
-                        val fos = FileOutputStream(file)
-                        bitmap?.compress(Bitmap.CompressFormat.PNG, 100, fos)
-                        fos.flush()
-                        fos.close()
-                    }
-
-                    override fun onFailure(p0: Int) {
+                if (temp.size > 0) {
+                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        step = "点击订阅"
                     }
                 }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                takeScreenshot(
-                    Display.DEFAULT_DISPLAY,
-                    applicationContext.mainExecutor,
-                    takeScreenshotCallback
-                )
             }
+//            TessBaseAPI().init("chi_sim","chi_sim")
+//            val takeScreenshotCallback =
+//                @RequiresApi(Build.VERSION_CODES.R)
+//                object : TakeScreenshotCallback {
+//                    override fun onSuccess(p0: ScreenshotResult) {
+//                        val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
+//                        try {
+//                            if (bitmap != null) {
+//                                println(bitmap.toString())
+//                            }
+//                        } catch (e: Exception) {
+//
+//                        }
+//
+//                    }
+//
+//                    override fun onFailure(p0: Int) {
+//                    }
+//                }
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+//                takeScreenshot(
+//                    Display.DEFAULT_DISPLAY,
+//                    applicationContext.mainExecutor,
+//                    takeScreenshotCallback
+//                )
+//            }
         }
         if (step == "点击订阅") {
             sleep(1000)
