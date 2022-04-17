@@ -10,6 +10,8 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
 
+
+@RequiresApi(Build.VERSION_CODES.N)
 class AccService : AccessibilityService() {
     private var step = "开始获取积分"
 
@@ -188,6 +190,8 @@ class AccService : AccessibilityService() {
             if (qgydClick != null) {
                 performGlobalAction(GLOBAL_ACTION_BACK)
                 step = "开始发表观点"
+                // 断点 记得删除
+                step = "进入我的"
             }
         }
         if (step == "开始发表观点") {
@@ -351,7 +355,6 @@ class AccService : AccessibilityService() {
                 }
             }
         }
-        @RequiresApi(Build.VERSION_CODES.N)
         if (step == "开始视听次数" && spcs <= 6) {
             sleep(8000)
             spcs++
@@ -467,171 +470,177 @@ class AccService : AccessibilityService() {
                             sleep(360000)
                             performGlobalAction(GLOBAL_ACTION_BACK)
                             sleep(1000)
-                            step = "再次进入积分"
+                            step = "进入我的"
                         }
                     }
                     wzcs++
                 }
             }
             if (wyxdwzClick?.text == ywc) {
-                step = "再次进入积分"
+                step = "进入我的"
             }
         }
-        if (step == "再次进入积分") {
+        if (step == "进入我的") {
             if (rootInActiveWindow != null) {
                 val temp =
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_score")
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_mine")
                 if (temp.size > 0) {
                     if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        temp[0].contentDescription
-                        step = "滑动到答题和订阅"
+                        step = "点击订阅"
                     }
                 }
             }
         }
-        @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "滑动到答题和订阅") {
+        if (step == "点击订阅") {
             sleep(1000)
-            onDispatchGesture(555F, 2200F, 555F, 230F, 50, 2000)
-            step = "进入每日答题"
-            step = "进入每周答题"
-            step = "进入专项答题"
-            step = "进入挑战答题"
-            step = "进入四人赛"
-//            step = "进入双人对战"
-//            step = "进入订阅"
-        }
-        @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "进入每日答题") {
-            sleep(3000)
-            onDispatchGesture(950F, 330F, 0F, 0F, 50, 50)
-            step = "111111"
-        }
-        @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "进入每周答题") {
-            sleep(3000)
-            onDispatchGesture(950F, 630F, 0F, 0F, 50, 50)
-            step = "111111"
-        }
-        @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "进入专项答题") {
-            sleep(3000)
-            onDispatchGesture(950F, 890F, 0F, 0F, 50, 50)
-            step = "111111"
-        }
-        @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "进入挑战答题") {
-            sleep(3000)
-            onDispatchGesture(950F, 1150F, 0F, 0F, 50, 50)
-            step = "111111"
-        }
-        @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "进入四人赛") {
-            sleep(3000)
-            onDispatchGesture(950F, 1480F, 0F, 0F, 50, 50)
-            step = "点击进入比赛"
-        }
-        @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "点击进入比赛") {
-            sleep(1000)
-            onDispatchGesture(530F, 1880F, 0F, 0F, 50, 50)
-            step = "点击开始比赛"
-        }
-        @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "点击开始比赛") {
-            sleep(5000)
-            onDispatchGesture(530F, 1880F, 0F, 0F, 50, 50)
-            step = "选择四人赛答案"
-        }
-        // 不能使用手势了 也不能使用find了
-        @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "选择四人赛答案") {
-            sleep(3000)
-            // onDispatchGesture(530F, 930F, 0F, 0F, 50, 50)
-            recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
-            val mutableList: MutableList<AccessibilityNodeInfo> = mutableListOf()
-            mutableListAccessibilityNodeInfo.forEach { ani ->
-                if (ani.isClickable) {
-                    mutableList.add(ani)
-                }
-            }
-            (0 until mutableList.size).forEach { index ->
-                if (index == 0) {
-                    mutableList[index].performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                }
-            }
-            step = "选择四人赛答案"
-        }
-        @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "进入双人对战") {
-            sleep(3000)
-            onDispatchGesture(950F, 1830F, 0F, 0F, 50, 50)
-            step = "111111"
-        }
-        @RequiresApi(Build.VERSION_CODES.N)
-        if (step == "进入订阅") {
-            sleep(3000)
             if (dyF?.text == "已获0分/每日上限2分" || dyF?.text == "已获1分/每日上限2分") {
-                onDispatchGesture(950F, 2120F, 0F, 0F, 50, 50)
-                step = "点击强国号上新"
+                onDispatchGesture(540F, 510F, 0F, 0F, 50, 50)
+                step = "点击添加"
             }
             if (dyF?.text == "已获2分/每日上限2分") {
-                step = "结束"
-                println(step)
+                step = "点击我要答题"
             }
         }
-        @RequiresApi(Build.VERSION_CODES.N)
+        if (step == "点击添加") {
+            sleep(1000)
+            onDispatchGesture(990F, 150F, 0F, 0F, 50, 50)
+            step = "点击强国号上新"
+        }
         if (step == "点击强国号上新") {
             sleep(1000)
             onDispatchGesture(140F, 480F, 0F, 0F, 50, 50)
             step = "点击强国号上新订阅"
         }
-        @RequiresApi(Build.VERSION_CODES.N)
         if (step == "点击强国号上新订阅") {
             sleep(1000)
             onDispatchGesture(980F, 340F, 0F, 0F, 50, 50)
             step = "点击地方平台"
         }
-        @RequiresApi(Build.VERSION_CODES.N)
         if (step == "点击地方平台") {
             step = if (dyF?.text == "已获0分/每日上限2分") {
                 sleep(1000)
                 onDispatchGesture(650F, 180F, 0F, 0F, 50, 50)
                 "点击地方平台上新"
             } else {
-                "从订阅返回积分学习"
+                "从订阅返回我的"
             }
         }
-        @RequiresApi(Build.VERSION_CODES.N)
         if (step == "点击地方平台上新") {
             sleep(1000)
             onDispatchGesture(140F, 480F, 0F, 0F, 50, 50)
             step = "点击地方平台上新订阅"
         }
-        @RequiresApi(Build.VERSION_CODES.N)
         if (step == "点击地方平台上新订阅") {
             sleep(1000)
             onDispatchGesture(980F, 340F, 0F, 0F, 50, 50)
-            step = "从订阅返回积分学习"
+            step = "从订阅返回我的"
         }
-        if (step == "从订阅返回积分学习") {
+        if (step == "从订阅返回我的") {
             sleep(1000)
-            performGlobalAction(GLOBAL_ACTION_BACK)
-            step = "结束"
-        }
-
-        if (step == "获取题目") {
-            sleep(1000)
-            recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
-            mutableListAccessibilityNodeInfo.forEach { ani ->
-                if (ani.text != null) {
-                    val temp = ani.text.toString()
-                    if (temp.indexOf("/5", 0, false) == -1) {
-                        println(ani.text)
-                    }
+            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                sleep(1000)
+                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                    step = "点击我要答题"
                 }
             }
-            step = "获取题目111"
+        }
+        if (step == "点击我要答题") {
+            sleep(1000)
+            onDispatchGesture(900F, 950F, 0F, 0F, 50, 50)
+            step = "进入每日答题"
+        }
+        if (step == "进入每日答题") {
+            sleep(1000)
+            onDispatchGesture(220F, 700F, 0F, 0F, 50, 50)
+            sleep(1000)
+            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+                step = "进入每周答题"
+            }
+        }
+        if (step == "进入每周答题") {
+            sleep(1000)
+            onDispatchGesture(550F, 700F, 0F, 0F, 50, 50)
+            sleep(1000)
+            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                step = "进入专项答题"
+            }
+        }
+        if (step == "进入专项答题") {
+            sleep(1000)
+            onDispatchGesture(900F, 700F, 0F, 0F, 50, 50)
+            sleep(1000)
+            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                step = "进入四人赛"
+            }
+        }
+        if (step == "进入四人赛") {
+            sleep(1000)
+            onDispatchGesture(300F, 1450F, 0F, 0F, 50, 50)
+            sleep(1000)
+            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                step = "进入双人对战"
+            }
+        }
+//        if (step == "点击进入比赛") {
+//            sleep(1000)
+//            onDispatchGesture(530F, 1880F, 0F, 0F, 50, 50)
+//            step = "点击开始比赛"
+//        }
+//        if (step == "点击开始比赛") {
+//            sleep(5000)
+//            onDispatchGesture(530F, 1880F, 0F, 0F, 50, 50)
+//            step = "选择四人赛答案"
+//        }
+//        // 不能使用手势了 也不能使用find了
+//        if (step == "选择四人赛答案") {
+//            sleep(3000)
+//            // onDispatchGesture(530F, 930F, 0F, 0F, 50, 50)
+//            recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
+//            val mutableList: MutableList<AccessibilityNodeInfo> = mutableListOf()
+//            mutableListAccessibilityNodeInfo.forEach { ani ->
+//                if (ani.isClickable) {
+//                    mutableList.add(ani)
+//                }
+//            }
+//            (0 until mutableList.size).forEach { index ->
+//                if (index == 0) {
+//                    mutableList[index].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+//                }
+//            }
+//            step = "选择四人赛答案"
+//        }
+//
+//        if (step == "获取题目") {
+//            sleep(1000)
+//            recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
+//            mutableListAccessibilityNodeInfo.forEach { ani ->
+//                if (ani.text != null) {
+//                    val temp = ani.text.toString()
+//                    if (temp.indexOf("/5", 0, false) == -1) {
+//                        println(ani.text)
+//                    }
+//                }
+//            }
+//            step = "获取题目111"
+//        }
+        if (step == "进入双人对战") {
+            sleep(1000)
+            onDispatchGesture(800F, 1300F, 0F, 0F, 50, 50)
+            sleep(1000)
+            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+                step = "进入挑战答题"
+            }
+        }
+        if (step == "进入挑战答题") {
+            sleep(1000)
+            onDispatchGesture(800F, 1600F, 0F, 0F, 50, 50)
+            sleep(3000)
+            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+                step = "结束"
+            }
         }
     }
 
@@ -702,7 +711,6 @@ class AccService : AccessibilityService() {
     /**
      * dispatchGesture
      */
-    @RequiresApi(Build.VERSION_CODES.N)
     fun onDispatchGesture(
         moveToX: Float,
         moveToY: Float,
