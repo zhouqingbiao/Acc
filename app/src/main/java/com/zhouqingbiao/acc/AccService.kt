@@ -19,34 +19,6 @@ import java.util.concurrent.Executor
 class AccService : AccessibilityService() {
     val tessBaseAPI = TessBaseAPI()
 
-    private var threadTessBaseAPI = Thread {
-        var mBitmap: Bitmap?
-        val takeScreenshotCallback =
-            @RequiresApi(Build.VERSION_CODES.R)
-            object : TakeScreenshotCallback {
-                override fun onSuccess(p0: ScreenshotResult) {
-                    println("Success")
-                    val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
-                    mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
-                    println(mBitmap != null)
-                    if (mBitmap != null) {
-                        tessBaseAPI.setImage(mBitmap)
-                        println(tessBaseAPI.utF8Text)
-                    }
-                }
-
-                override fun onFailure(p0: Int) {
-                }
-            }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            takeScreenshot(
-                Display.DEFAULT_DISPLAY,
-                applicationContext.mainExecutor,
-                takeScreenshotCallback
-            )
-        }
-    }
-
     private var step = "开始获取积分"
 
     private var ywc = "已完成"
@@ -227,6 +199,7 @@ class AccService : AccessibilityService() {
             if (qgydClick != null) {
                 performGlobalAction(GLOBAL_ACTION_BACK)
                 step = "开始发表观点"
+                // 记得删除
                 step = "进入我的"
             }
         }
@@ -591,7 +564,8 @@ class AccService : AccessibilityService() {
             sleep(1000)
             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                 onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
-                threadTessBaseAPI.start()
+                // 截图OCR
+                ThreadTessBaseAPI().start()
                 sleep(5000)
                 step = "进入每周答题"
             }
@@ -858,4 +832,35 @@ class AccService : AccessibilityService() {
         }
         return null
     }
+
+    private inner class ThreadTessBaseAPI : Thread() {
+        override fun run() {
+            var mBitmap: Bitmap?
+            val takeScreenshotCallback =
+                @RequiresApi(Build.VERSION_CODES.R)
+                object : TakeScreenshotCallback {
+                    override fun onSuccess(p0: ScreenshotResult) {
+                        println("Success")
+                        val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
+                        mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
+                        println(mBitmap != null)
+                        if (mBitmap != null) {
+                            tessBaseAPI.setImage(mBitmap)
+                            println(tessBaseAPI.utF8Text)
+                        }
+                    }
+
+                    override fun onFailure(p0: Int) {
+                    }
+                }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                takeScreenshot(
+                    Display.DEFAULT_DISPLAY,
+                    applicationContext.mainExecutor,
+                    takeScreenshotCallback
+                )
+            }
+        }
+    }
 }
+
