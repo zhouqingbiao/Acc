@@ -851,6 +851,9 @@ class AccService : AccessibilityService() {
         return null
     }
 
+    /**
+     * TessBaseAPI
+     */
     private inner class ThreadTessBaseAPI : Thread() {
         override fun run() {
             var mBitmap: Bitmap?
