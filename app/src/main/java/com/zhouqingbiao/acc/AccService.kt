@@ -98,9 +98,6 @@ class AccService : AccessibilityService() {
     // 删除控件
     var scKj: AccessibilityNodeInfo? = null
 
-    // 分享到学习强国
-    var fxdxxqg: AccessibilityNodeInfo? = null
-
     // 分享次数
     var fxcs = 0
 
