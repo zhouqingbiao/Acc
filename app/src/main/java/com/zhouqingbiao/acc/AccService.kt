@@ -19,7 +19,7 @@ import java.util.concurrent.Executor
 
 @RequiresApi(Build.VERSION_CODES.N)
 class AccService : AccessibilityService() {
-    val tessBaseAPI = TessBaseAPI()
+    var tessBaseAPI = TessBaseAPI()
 
     private var step = "开始获取积分"
 
@@ -86,50 +86,60 @@ class AccService : AccessibilityService() {
     private var qgydClick: AccessibilityNodeInfo? = null
 
     // 欢迎发表你的观点控件
-    var hyfbndgdKj: AccessibilityNodeInfo? = null
+    private var hyfbndgdKj: AccessibilityNodeInfo? = null
 
     // 分享控件
-    var fxKj: AccessibilityNodeInfo? = null
+    private var fxKj: AccessibilityNodeInfo? = null
 
     // 好观点将会被优先展示控件
-    var hgdjhbyxzsKj: AccessibilityNodeInfo? = null
+    private var hgdjhbyxzsKj: AccessibilityNodeInfo? = null
 
     // 发布控件
-    var fbKj: AccessibilityNodeInfo? = null
+    private var fbKj: AccessibilityNodeInfo? = null
 
     // 删除控件
-    var scKj: AccessibilityNodeInfo? = null
+    private var scKj: AccessibilityNodeInfo? = null
 
     // 分享次数
-    var fxcs = 0
+    private var fxcs = 0
 
     // 视频次数
-    var spcs = 0
+    private var spcs = 0
 
     // 工作
-    var gz: AccessibilityNodeInfo? = null
+    private var gz: AccessibilityNodeInfo? = null
 
     // 文章次数
-    var wzcs = 0
+    private var wzcs = 0
 
     override fun onServiceConnected() {
         super.onServiceConnected()
 
+        // 初始化
+
         val inputStream = applicationContext.assets.open("chi_sim.traineddata")
-        val file = File(filesDir.path, "/tessdata/chi_sim.traineddata")
+        var file = File(filesDir.path, File.separator + "tessdata")
         if (!file.exists()) {
             file.mkdirs()
-            file.createNewFile()
         }
-        val fileOutputStream = FileOutputStream(file.path)
-        fileOutputStream.write(inputStream.read())
+        file = File(file.path + File.separator + "chi_sim.traineddata")
+        if (!file.exists()) {
+            val fileOutputStream = FileOutputStream(file.path)
+            val buffer = ByteArray(1024)
+            var count: Int
+            while (inputStream.read(buffer).also { count = it } > 0) {
+                fileOutputStream.write(buffer, 0, count)
+            }
+            fileOutputStream.write(inputStream.read())
+            fileOutputStream.flush()
+            fileOutputStream.close()
+            inputStream.close()
+        }
 
-        // 初始化
         tessBaseAPI.init(filesDir.path, "chi_sim")
 
         step = "开始获取积分"
     }
-
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (step == "开始获取积分") {
