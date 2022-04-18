@@ -858,7 +858,6 @@ class AccService : AccessibilityService() {
                 @RequiresApi(Build.VERSION_CODES.R)
                 object : TakeScreenshotCallback {
                     override fun onSuccess(p0: ScreenshotResult) {
-                        println("Success")
                         val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
                         mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
                         println(mBitmap != null)
