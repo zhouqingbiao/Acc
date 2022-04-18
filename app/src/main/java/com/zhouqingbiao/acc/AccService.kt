@@ -12,6 +12,8 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
 import com.googlecode.tesseract.android.TessBaseAPI
+import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.Executor
 
 
@@ -112,6 +114,15 @@ class AccService : AccessibilityService() {
 
     override fun onServiceConnected() {
         super.onServiceConnected()
+
+        val inputStream = applicationContext.assets.open("chi_sim.traineddata")
+        val file = File(filesDir.path, "/tessdata/chi_sim.traineddata")
+        if (!file.exists()) {
+            file.mkdirs()
+            file.createNewFile()
+        }
+        val fileOutputStream = FileOutputStream(file.path)
+        fileOutputStream.write(inputStream.read())
 
         // 初始化
         tessBaseAPI.init(filesDir.path, "chi_sim")
