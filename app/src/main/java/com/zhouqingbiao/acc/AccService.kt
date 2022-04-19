@@ -11,7 +11,10 @@ import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
+import androidx.room.Room
 import com.googlecode.tesseract.android.TessBaseAPI
+import com.zhouqingbiao.acc.database.MrdtDatabase
+import com.zhouqingbiao.acc.entity.Mrdt
 import org.jsoup.Jsoup
 import java.io.File
 import java.io.FileOutputStream
@@ -21,6 +24,13 @@ import java.util.concurrent.Executor
 @RequiresApi(Build.VERSION_CODES.N)
 class AccService : AccessibilityService() {
     var tessBaseAPI = TessBaseAPI()
+
+    var mrdtDatabase = Room.databaseBuilder(
+        applicationContext,
+        MrdtDatabase::class.java, "mrdtDatabase"
+    ).build()
+
+    var mrdtDao = mrdtDatabase.mrdtDao()
 
     private var step = "开始获取积分"
 
@@ -588,10 +598,10 @@ class AccService : AccessibilityService() {
                 "查看提示"
             )
             if (temp != null) {
-                println(temp?.parent.parent.getChild(0).getChild(0).text)
-            }
-            if (temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                step = "点击查看提示"
+                println(temp.parent.parent.getChild(0).getChild(0).text)
+                if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    step = "点击查看提示"
+                }
             }
             // 截图OCR
             // ThreadTessBaseAPI().start()
@@ -609,6 +619,10 @@ class AccService : AccessibilityService() {
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "查看提示"
                 )
+                val mrdt: Mrdt = mrdtDao.findByTs("多选题", "aaaaa")
+                println(mrdt.t)
+                println(mrdt.ts)
+                println(mrdt.da)
                 if (temp != null) {
                     println(
                         temp.parent.parent.parent.parent.getChild(2).getChild(1).getChild(0).text

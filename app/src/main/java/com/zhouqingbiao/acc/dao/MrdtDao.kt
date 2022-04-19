@@ -1,22 +1,15 @@
 package com.zhouqingbiao.acc.dao
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import com.zhouqingbiao.acc.entity.Mrdt
 
-@Entity
-data class MrdtDao(
-    @PrimaryKey
-    val id: Long,
-    /**
-     * 题
-     */
-    val t: String,
-    /**
-     * 提示
-     */
-    val ts: String,
-    /**
-     * 答案
-     */
-    val da: String
-)
+@Dao
+interface MrdtDao {
+    @Insert
+    fun insert(vararg mrdt: Mrdt)
+
+    @Query("SELECT * FROM mrdt WHERE t = :t AND ts = :ts")
+    fun findByTs(t: String, ts: String): Mrdt
+}
