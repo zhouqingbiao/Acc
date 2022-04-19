@@ -583,19 +583,36 @@ class AccService : AccessibilityService() {
             sleep(1000)
             onDispatchGesture(220F, 700F, 0F, 0F, 50, 50)
             sleep(1000)
-            val temp = findByText(
+            val temp = findByTextOfContains(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "查看提示"
             )
-            println(temp)
+            if (temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+                step = "点击查看提示"
+            }
             // 截图OCR
             // ThreadTessBaseAPI().start()
-            step = "111111"
+//            step = "111111"
 //            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
 //                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
 //                sleep(5000)
 //                step = "进入每周答题"
 //            }
+        }
+        if (step == "点击查看提示") {
+            sleep(1000)
+            if (rootInActiveWindow != null) {
+                val temp = findByTextOfContains(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "查看提示"
+                )
+                if (temp != null) {
+                    println(
+                        temp.parent.parent.parent.parent.getChild(2).getChild(1).getChild(0).text
+                    )
+                    step = "1111"
+                }
+            }
         }
         if (step == "进入每周答题") {
             sleep(1000)
@@ -851,16 +868,37 @@ class AccService : AccessibilityService() {
         text: String
     ): AccessibilityNodeInfo? {
         recycle(mutableList)
+        var temp: AccessibilityNodeInfo? = null
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
-                println(ani.text)
                 if (ani.text == text) {
-                    mutableListAccessibilityNodeInfo.clear()
-                    return ani
+                    temp = ani
                 }
             }
         }
-        return null
+        mutableListAccessibilityNodeInfo.clear()
+        return temp
+    }
+
+    /**
+     * 根据Text查找控件
+     * contains
+     */
+    private fun findByTextOfContains(
+        mutableList: MutableList<AccessibilityNodeInfo>,
+        text: String
+    ): AccessibilityNodeInfo? {
+        recycle(mutableList)
+        var temp: AccessibilityNodeInfo? = null
+        mutableListAccessibilityNodeInfo.forEach { ani ->
+            if (ani.text != null) {
+                if (ani.text.contains(text)) {
+                    temp = ani
+                }
+            }
+        }
+        mutableListAccessibilityNodeInfo.clear()
+        return temp
     }
 
     /**
