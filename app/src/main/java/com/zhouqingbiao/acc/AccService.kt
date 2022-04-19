@@ -580,13 +580,14 @@ class AccService : AccessibilityService() {
             sleep(1000)
             onDispatchGesture(220F, 700F, 0F, 0F, 50, 50)
             sleep(1000)
-            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
-                // 截图OCR
-                ThreadTessBaseAPI().start()
-                sleep(5000)
-                step = "进入每周答题"
-            }
+            // 截图OCR
+            ThreadTessBaseAPI().start()
+            step = "111111"
+//            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+//                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+//                sleep(5000)
+//                step = "进入每周答题"
+//            }
         }
         if (step == "进入每周答题") {
             sleep(1000)
@@ -863,10 +864,12 @@ class AccService : AccessibilityService() {
                     override fun onSuccess(p0: ScreenshotResult) {
                         val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
                         mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
-                        println(mBitmap != null)
                         if (mBitmap != null) {
                             tessBaseAPI.setImage(mBitmap)
+
                             println(tessBaseAPI.utF8Text)
+                            tessBaseAPI.clear()
+                            tessBaseAPI.end()
                         }
                     }
 
