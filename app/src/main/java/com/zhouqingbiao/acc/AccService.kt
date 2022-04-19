@@ -583,8 +583,13 @@ class AccService : AccessibilityService() {
             sleep(1000)
             onDispatchGesture(220F, 700F, 0F, 0F, 50, 50)
             sleep(1000)
+            val temp = findByText(
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                "查看提示"
+            )
+            println(temp)
             // 截图OCR
-            ThreadTessBaseAPI().start()
+            // ThreadTessBaseAPI().start()
             step = "111111"
 //            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
 //                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
@@ -848,6 +853,7 @@ class AccService : AccessibilityService() {
         recycle(mutableList)
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
+                println(ani.text)
                 if (ani.text == text) {
                     mutableListAccessibilityNodeInfo.clear()
                     return ani
