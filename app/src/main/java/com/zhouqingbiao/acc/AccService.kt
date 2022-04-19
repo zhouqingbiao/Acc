@@ -679,6 +679,8 @@ class AccService : AccessibilityService() {
     }
 
     override fun onInterrupt() {
+        // 在这里结束tessBaseAPI
+        tessBaseAPI.end()
     }
 
     override fun takeScreenshot(
@@ -889,7 +891,6 @@ class AccService : AccessibilityService() {
                                 }
                             }
                             tessBaseAPI.clear()
-                            tessBaseAPI.end()
                         }
                     }
 
