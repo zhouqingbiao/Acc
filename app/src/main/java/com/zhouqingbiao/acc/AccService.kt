@@ -587,6 +587,9 @@ class AccService : AccessibilityService() {
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "查看提示"
             )
+            if (temp != null) {
+                println(temp?.parent.parent.getChild(0).getChild(0).text)
+            }
             if (temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
                 step = "点击查看提示"
             }
