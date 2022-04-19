@@ -12,6 +12,7 @@ import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
 import com.googlecode.tesseract.android.TessBaseAPI
+import org.jsoup.Jsoup
 import java.io.File
 import java.io.FileOutputStream
 import java.util.concurrent.Executor
@@ -217,7 +218,7 @@ class AccService : AccessibilityService() {
             if (qgydClick != null) {
                 performGlobalAction(GLOBAL_ACTION_BACK)
                 step = "开始发表观点"
-                // 记得删除
+                // 删除
                 step = "进入我的"
             }
         }
@@ -514,6 +515,8 @@ class AccService : AccessibilityService() {
                 if (temp.size > 0) {
                     if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                         step = "点击订阅"
+                        // 删除
+                        step = "点击我要答题"
                     }
                 }
             }
@@ -866,8 +869,25 @@ class AccService : AccessibilityService() {
                         mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
                         if (mBitmap != null) {
                             tessBaseAPI.setImage(mBitmap)
-
-                            println(tessBaseAPI.utF8Text)
+                            val hOCRText = tessBaseAPI.getHOCRText(0)
+                            println(hOCRText)
+                            val doc = Jsoup.parse(hOCRText)
+                            val a = doc.getElementsByClass("ocrx_word")
+                            (0 until a.size).forEach { index ->
+                                if (a[index].text() == "A.") {
+                                    println("=======================" + a[index].text())
+                                    val title = a[index].attributes().get("title")
+                                    println(title)
+                                    val xy = title.split(";")[0].replace("bbox ", "")
+                                    println(xy)
+                                    val x = xy.split(" ")[0].toFloat()
+                                    val y = xy.split(" ")[1].toFloat()
+                                    println("=======================$x")
+                                    println("=======================$y")
+                                    onDispatchGesture(x, y, 0F, 0F, 50, 50)
+                                    println("=======================")
+                                }
+                            }
                             tessBaseAPI.clear()
                             tessBaseAPI.end()
                         }
