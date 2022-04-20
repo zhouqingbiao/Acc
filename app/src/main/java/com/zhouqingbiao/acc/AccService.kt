@@ -617,7 +617,7 @@ class AccService : AccessibilityService() {
             onDispatchGesture(900F, 950F, 0F, 0F, 50, 50)
             step = "进入每日答题"
         }
-        if (step == "进入每日答题" && mrcs < 3) {
+        if (step == "进入每日答题" && mrcs < 20) {
             sleep(1000)
             onDispatchGesture(220F, 700F, 0F, 0F, 50, 50)
             sleep(1000)
@@ -631,14 +631,6 @@ class AccService : AccessibilityService() {
                     step = "点击查看提示"
                 }
             }
-            // 截图OCR
-            // ThreadTessBaseAPI().start()
-//            step = "111111"
-//            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-//                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
-//                sleep(5000)
-//                step = "进入每周答题"
-//            }
         }
         if (step == "点击查看提示") {
             sleep(1000)
