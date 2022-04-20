@@ -10,23 +10,23 @@
         android:id="@+id/switch_acc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:minHeight="48dp"
-        android:onClick="switchAcc"
+        android:onClick="onClickACC"
         android:text="@string/switch_acc"
-        app:layout_constraintBottom_toTopOf="@+id/button_xxqg"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/button_xxqg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="startXxqg"
+        android:layout_marginTop="16dp"
+        android:onClick="onClickX"
         android:text="@string/button_xxqg"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/switch_acc" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

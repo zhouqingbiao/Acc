@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    fun switchAcc(view: View) {
+    fun onClickACC(view: View) {
         val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         val cn = ComponentName("com.zhouqingbiao.acc", "com.zhouqingbiao.acc.AccService")
         if (am.getRunningServiceControlPanel(cn) == null) {
@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<SwitchMaterial>(R.id.switch_acc).isChecked = true
     }
 
-    fun startXxqg(view: View) {
+    fun onClickX(view: View) {
         startActivity(packageManager.getLaunchIntentForPackage("cn.xuexi.android"))
     }
 }

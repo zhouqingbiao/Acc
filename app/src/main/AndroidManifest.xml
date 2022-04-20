@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.zhouqingbiao.acc">
 
+    <queries>
+        <package android:name="cn.xuexi.android" />
+    </queries>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,7 +13,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Acc">
-
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -19,6 +22,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <service
             android:name=".AccService"
             android:exported="false"
@@ -27,12 +31,11 @@
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
+
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/acc" />
         </service>
     </application>
-    <queries>
-        <package android:name="cn.xuexi.android" />
-    </queries>
+
 </manifest>
