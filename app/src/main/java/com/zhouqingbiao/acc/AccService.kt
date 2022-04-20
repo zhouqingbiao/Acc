@@ -13,6 +13,7 @@ import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
 import androidx.room.Room
 import com.googlecode.tesseract.android.TessBaseAPI
+import com.zhouqingbiao.acc.dao.MrdtDao
 import com.zhouqingbiao.acc.database.MrdtDatabase
 import com.zhouqingbiao.acc.entity.Mrdt
 import org.jsoup.Jsoup
@@ -27,6 +28,10 @@ import java.util.concurrent.TimeUnit
 @RequiresApi(Build.VERSION_CODES.N)
 class AccService : AccessibilityService() {
     var tessBaseAPI = TessBaseAPI()
+
+    var mrdtDatabase: MrdtDatabase? = null
+
+    var mrdtDao: MrdtDao? = null
 
     /*
      * Gets the number of available cores
@@ -176,6 +181,15 @@ class AccService : AccessibilityService() {
         }
 
         tessBaseAPI.init(filesDir.path, "chi_sim")
+
+        mrdtDatabase = Room.databaseBuilder(
+            applicationContext,
+            MrdtDatabase::class.java, "MrdtDatabase"
+        ).allowMainThreadQueries().build()
+
+        mrdtDao = mrdtDatabase!!.mrdtDao()
+
+        mrdtDao!!.findByTs("", "")
 
         step = "开始获取积分"
     }
@@ -623,7 +637,7 @@ class AccService : AccessibilityService() {
             sleep(1000)
             val temp = findByTextOfContains(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "查看提示"
+                "查看提示", ""
             )
 
             if (temp != null) {
@@ -637,61 +651,47 @@ class AccService : AccessibilityService() {
             if (rootInActiveWindow != null) {
                 val temp = findByTextOfContains(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "查看提示"
+                    "提示", "查看提示"
                 )
-                if (temp != null) {
-                    val t = temp.parent.parent.getChild(0).getChild(0).text
-                    val ts =
-                        temp.parent.parent.parent.parent.getChild(2).getChild(1).getChild(0).text
-                    if (ts != "请观看视频") {
-                        val mrdtDatabase = Room.databaseBuilder(
-                            applicationContext,
-                            MrdtDatabase::class.java, "MrdtDatabase"
-                        ).allowMainThreadQueries().build()
-
-                        val mrdtDao = mrdtDatabase.mrdtDao()
-                        val mrdt: List<Mrdt> = mrdtDao.findByTs(
-                            "${temp.parent.parent.getChild(0).getChild(0).text}",
-                            "${
-                                temp.parent.parent.parent.parent.getChild(2).getChild(1)
-                                    .getChild(0).text
-                            }"
-                        )
-                        if (mrdt.size == 1) {
-                            println(mrdt[0].t)
-                            println(mrdt[0].ts)
-                            println(mrdt[0].da)
-                        }
+                try {
+                    if (temp != null) {
+                        val t = temp.parent.parent.parent.getChild(0).getChild(0).getChild(0)
+                            .getChild(0).text
+                        val ts = temp.parent.parent.getChild(1).getChild(0).text
+                        println(t)
+                        println(ts)
+                        val mrdt: List<Mrdt> = mrdtDao!!.findByTs("$t", "$ts")
                         if (mrdt.isEmpty()) {
-                            mrdtDao.insert(Mrdt(0, t.toString(), ts.toString(), ""))
-                            val aaa: List<Mrdt> = mrdtDao.findByTs(
-                                "${temp.parent.parent.getChild(0).getChild(0).text}",
-                                "${
-                                    temp.parent.parent.parent.parent.getChild(2).getChild(1)
-                                        .getChild(0).text
-                                }"
-                            )
-                            if (aaa.size == 1) {
-                                println(aaa[0].id)
-                                println(aaa[0].t)
-                                println(aaa[0].ts)
-                                println(aaa[0].da)
-
-                                roomId = aaa[0].id
+                            mrdtDao!!.insert(Mrdt(0, t.toString(), ts.toString(), ""))
+                            val insert: List<Mrdt> = mrdtDao!!.findByTs("$t", "$ts")
+                            if (insert.size == 1) {
+                                roomId = insert[0].id
                                 takeScreenshotToFile("mrdt", 1)
+                                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                    sleep(1000)
+                                    takeScreenshotToFile("mrdt", 2)
+                                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                        sleep(1000)
+                                        onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+                                        step = "进入每日答题"
+                                        mrcs++
+                                    }
+                                }
+                            }
+                        } else {
+                            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                sleep(1000)
+                                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                    sleep(1000)
+                                    onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+                                    step = "进入每日答题"
+                                    mrcs++
+                                }
                             }
                         }
                     }
-                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                        sleep(1000)
-                        takeScreenshotToFile("mrdt", 2)
-                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                            sleep(1000)
-                            onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
-                            step = "进入每日答题"
-                            mrcs++
-                        }
-                    }
+                } catch (e: Exception) {
+
                 }
             }
         }
@@ -912,19 +912,26 @@ class AccService : AccessibilityService() {
     }
 
     /**
-     * 根据Text查找控件
+     * 根据Text查找控件 包含一些 排除一些
      * contains
+     * exclude
      */
     private fun findByTextOfContains(
         mutableList: MutableList<AccessibilityNodeInfo>,
-        text: String
+        contains: String, exclude: String
     ): AccessibilityNodeInfo? {
         recycle(mutableList)
         var temp: AccessibilityNodeInfo? = null
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
-                if (ani.text.contains(text)) {
-                    temp = ani
+                if (exclude != "") {
+                    if (ani.text.contains(contains) && !ani.text.contains(exclude)) {
+                        temp = ani
+                    }
+                } else {
+                    if (ani.text.contains(contains)) {
+                        temp = ani
+                    }
                 }
             }
         }
