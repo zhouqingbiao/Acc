@@ -625,6 +625,7 @@ class AccService : AccessibilityService() {
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "查看提示"
             )
+
             if (temp != null) {
                 if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     step = "点击查看提示"
@@ -650,47 +651,48 @@ class AccService : AccessibilityService() {
                     val t = temp.parent.parent.getChild(0).getChild(0).text
                     val ts =
                         temp.parent.parent.parent.parent.getChild(2).getChild(1).getChild(0).text
-                    val mrdtDatabase = Room.databaseBuilder(
-                        applicationContext,
-                        MrdtDatabase::class.java, "MrdtDatabase"
-                    ).allowMainThreadQueries().build()
+                    if (ts != "请观看视频") {
+                        val mrdtDatabase = Room.databaseBuilder(
+                            applicationContext,
+                            MrdtDatabase::class.java, "MrdtDatabase"
+                        ).allowMainThreadQueries().build()
 
-                    val mrdtDao = mrdtDatabase.mrdtDao()
-                    val mrdt: List<Mrdt> = mrdtDao.findByTs(
-                        "${temp.parent.parent.getChild(0).getChild(0).text}",
-                        "${
-                            temp.parent.parent.parent.parent.getChild(2).getChild(1)
-                                .getChild(0).text
-                        }"
-                    )
-                    if (mrdt.size == 1) {
-                        println(mrdt[0].t)
-                        println(mrdt[0].ts)
-                        println(mrdt[0].da)
-                    }
-                    if (mrdt.isEmpty()) {
-                        mrdtDao.insert(Mrdt(0, t.toString(), ts.toString(), ""))
-                        val aaa: List<Mrdt> = mrdtDao.findByTs(
+                        val mrdtDao = mrdtDatabase.mrdtDao()
+                        val mrdt: List<Mrdt> = mrdtDao.findByTs(
                             "${temp.parent.parent.getChild(0).getChild(0).text}",
                             "${
                                 temp.parent.parent.parent.parent.getChild(2).getChild(1)
                                     .getChild(0).text
                             }"
                         )
-                        if (aaa.size == 1) {
-                            println(aaa[0].id)
-                            println(aaa[0].t)
-                            println(aaa[0].ts)
-                            println(aaa[0].da)
+                        if (mrdt.size == 1) {
+                            println(mrdt[0].t)
+                            println(mrdt[0].ts)
+                            println(mrdt[0].da)
+                        }
+                        if (mrdt.isEmpty()) {
+                            mrdtDao.insert(Mrdt(0, t.toString(), ts.toString(), ""))
+                            val aaa: List<Mrdt> = mrdtDao.findByTs(
+                                "${temp.parent.parent.getChild(0).getChild(0).text}",
+                                "${
+                                    temp.parent.parent.parent.parent.getChild(2).getChild(1)
+                                        .getChild(0).text
+                                }"
+                            )
+                            if (aaa.size == 1) {
+                                println(aaa[0].id)
+                                println(aaa[0].t)
+                                println(aaa[0].ts)
+                                println(aaa[0].da)
 
-                            roomId = aaa[0].id
-                            takeScreenshotToFile()
-                            sleep(3000)
+                                roomId = aaa[0].id
+                                takeScreenshotToFile("mrdt", 1)
+                            }
                         }
                     }
-                    sleep(1000)
                     if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                         sleep(1000)
+                        takeScreenshotToFile("mrdt", 2)
                         if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                             sleep(1000)
                             onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
@@ -725,48 +727,6 @@ class AccService : AccessibilityService() {
                 step = "进入双人对战"
             }
         }
-//        if (step == "点击进入比赛") {
-//            sleep(1000)
-//            onDispatchGesture(530F, 1880F, 0F, 0F, 50, 50)
-//            step = "点击开始比赛"
-//        }
-//        if (step == "点击开始比赛") {
-//            sleep(5000)
-//            onDispatchGesture(530F, 1880F, 0F, 0F, 50, 50)
-//            step = "选择四人赛答案"
-//        }
-//        // 不能使用手势了 也不能使用find了
-//        if (step == "选择四人赛答案") {
-//            sleep(3000)
-//            // onDispatchGesture(530F, 930F, 0F, 0F, 50, 50)
-//            recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
-//            val mutableList: MutableList<AccessibilityNodeInfo> = mutableListOf()
-//            mutableListAccessibilityNodeInfo.forEach { ani ->
-//                if (ani.isClickable) {
-//                    mutableList.add(ani)
-//                }
-//            }
-//            (0 until mutableList.size).forEach { index ->
-//                if (index == 0) {
-//                    mutableList[index].performAction(AccessibilityNodeInfo.ACTION_CLICK)
-//                }
-//            }
-//            step = "选择四人赛答案"
-//        }
-//
-//        if (step == "获取题目") {
-//            sleep(1000)
-//            recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
-//            mutableListAccessibilityNodeInfo.forEach { ani ->
-//                if (ani.text != null) {
-//                    val temp = ani.text.toString()
-//                    if (temp.indexOf("/5", 0, false) == -1) {
-//                        println(ani.text)
-//                    }
-//                }
-//            }
-//            step = "获取题目111"
-//        }
         if (step == "进入双人对战") {
             sleep(1000)
             onDispatchGesture(800F, 1300F, 0F, 0F, 50, 50)
@@ -980,7 +940,10 @@ class AccService : AccessibilityService() {
         return temp
     }
 
-    private fun takeScreenshotToFile() {
+    /**
+     * TakeScreenshotToFile
+     */
+    private fun takeScreenshotToFile(string: String, index: Int) {
         var mBitmap: Bitmap?
         val takeScreenshotCallback =
             @RequiresApi(Build.VERSION_CODES.R)
@@ -989,13 +952,24 @@ class AccService : AccessibilityService() {
                     val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
                     mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
                     if (mBitmap != null) {
-                        val file = File(filesDir.path + File.separator + "png")
+                        val file =
+                            File(filesDir.path + File.separator + "png" + File.separator + string)
                         if (!file.exists()) {
                             file.mkdirs()
                         }
-                        val pngFile = File(file.path + File.separator + roomId + ".png")
-                        if (!pngFile.exists()) {
-                            pngFile.createNewFile()
+                        var pngFile: File? = null
+                        if (index == 1) {
+                            pngFile =
+                                File(file.path + File.separator + roomId + ".png")
+                        }
+                        if (index == 2) {
+                            pngFile =
+                                File(file.path + File.separator + roomId + "_" + roomId + ".png")
+                        }
+                        if (pngFile != null) {
+                            if (!pngFile.exists()) {
+                                pngFile.createNewFile()
+                            }
                         }
                         val fileOutputStream = FileOutputStream(pngFile)
                         mBitmap!!.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
