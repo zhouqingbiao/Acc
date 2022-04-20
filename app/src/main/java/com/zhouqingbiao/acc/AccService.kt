@@ -18,12 +18,42 @@ import com.zhouqingbiao.acc.entity.Mrdt
 import org.jsoup.Jsoup
 import java.io.File
 import java.io.FileOutputStream
-import java.util.concurrent.Executor
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 
 @RequiresApi(Build.VERSION_CODES.N)
 class AccService : AccessibilityService() {
     var tessBaseAPI = TessBaseAPI()
+
+    /*
+     * Gets the number of available cores
+     * (not always the same as the maximum number of cores)
+     */
+    private val NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors()
+
+    // Instantiates the queue of Runnables as a LinkedBlockingQueue
+    private val workQueue: BlockingQueue<Runnable> =
+        LinkedBlockingQueue<Runnable>()
+
+    // Sets the amount of time an idle thread waits before terminating
+    private val KEEP_ALIVE_TIME = 1L
+
+    // Sets the Time Unit to seconds
+    private val KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS
+
+    // Creates a thread pool manager
+    private val threadPoolExecutor: ThreadPoolExecutor = ThreadPoolExecutor(
+        // Initial pool size
+        NUMBER_OF_CORES,
+        // Max pool size
+        NUMBER_OF_CORES,
+        KEEP_ALIVE_TIME,
+        KEEP_ALIVE_TIME_UNIT,
+        workQueue
+    )
 
     private var step = "开始获取积分"
 
@@ -950,7 +980,7 @@ class AccService : AccessibilityService() {
         return temp
     }
 
-    private fun takeScreenshotToFile(){
+    private fun takeScreenshotToFile() {
         var mBitmap: Bitmap?
         val takeScreenshotCallback =
             @RequiresApi(Build.VERSION_CODES.R)
@@ -980,7 +1010,8 @@ class AccService : AccessibilityService() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 takeScreenshot(
                     Display.DEFAULT_DISPLAY,
-                    applicationContext.mainExecutor,
+                    // applicationContext.mainExecutor
+                    threadPoolExecutor,
                     takeScreenshotCallback
                 )
             }
@@ -990,93 +1021,49 @@ class AccService : AccessibilityService() {
     /**
      * TessBaseAPI
      */
-    private inner class ThreadTessBaseAPI : Thread() {
-        override fun run() {
-            var mBitmap: Bitmap?
-            val takeScreenshotCallback =
-                @RequiresApi(Build.VERSION_CODES.R)
-                object : TakeScreenshotCallback {
-                    override fun onSuccess(p0: ScreenshotResult) {
-                        val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
-                        mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
-                        if (mBitmap != null) {
-                            tessBaseAPI.setImage(mBitmap)
-                            val hOCRText = tessBaseAPI.getHOCRText(0)
-                            println(hOCRText)
-                            val doc = Jsoup.parse(hOCRText)
-                            val a = doc.getElementsByClass("ocrx_word")
-                            (0 until a.size).forEach { index ->
-                                if (a[index].text() == "A.") {
-                                    println("=======================" + a[index].text())
-                                    val title = a[index].attributes().get("title")
-                                    println(title)
-                                    val xy = title.split(";")[0].replace("bbox ", "")
-                                    println(xy)
-                                    val x = xy.split(" ")[0].toFloat()
-                                    val y = xy.split(" ")[1].toFloat()
-                                    println("=======================$x")
-                                    println("=======================$y")
-                                    onDispatchGesture(x, y, 0F, 0F, 50, 50)
-                                    println("=======================")
-                                }
+    private fun tessBaseAPI() {
+        var mBitmap: Bitmap?
+        val takeScreenshotCallback =
+            @RequiresApi(Build.VERSION_CODES.R)
+            object : TakeScreenshotCallback {
+                override fun onSuccess(p0: ScreenshotResult) {
+                    val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
+                    mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
+                    if (mBitmap != null) {
+                        tessBaseAPI.setImage(mBitmap)
+                        val hOCRText = tessBaseAPI.getHOCRText(0)
+                        println(hOCRText)
+                        val doc = Jsoup.parse(hOCRText)
+                        val a = doc.getElementsByClass("ocrx_word")
+                        (0 until a.size).forEach { index ->
+                            if (a[index].text() == "A.") {
+                                println("=======================" + a[index].text())
+                                val title = a[index].attributes().get("title")
+                                println(title)
+                                val xy = title.split(";")[0].replace("bbox ", "")
+                                println(xy)
+                                val x = xy.split(" ")[0].toFloat()
+                                val y = xy.split(" ")[1].toFloat()
+                                println("=======================$x")
+                                println("=======================$y")
+                                onDispatchGesture(x, y, 0F, 0F, 50, 50)
+                                println("=======================")
                             }
-                            tessBaseAPI.clear()
                         }
-                    }
-
-                    override fun onFailure(p0: Int) {
+                        tessBaseAPI.clear()
                     }
                 }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    takeScreenshot(
-                        Display.DEFAULT_DISPLAY,
-                        applicationContext.mainExecutor,
-                        takeScreenshotCallback
-                    )
+
+                override fun onFailure(p0: Int) {
                 }
             }
-        }
-    }
-
-    /**
-     * TessBaseAPIToFile
-     */
-    private inner class ThreadTessBaseAPIToFile() : Thread() {
-        override fun run() {
-            var mBitmap: Bitmap?
-            val takeScreenshotCallback =
-                @RequiresApi(Build.VERSION_CODES.R)
-                object : TakeScreenshotCallback {
-                    override fun onSuccess(p0: ScreenshotResult) {
-                        val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
-                        mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
-                        if (mBitmap != null) {
-                            val file = File(filesDir.path + File.separator + "png")
-                            if (!file.exists()) {
-                                file.mkdirs()
-                            }
-                            val pngFile = File(file.path + File.separator + roomId + ".png")
-                            if (!pngFile.exists()) {
-                                pngFile.createNewFile()
-                            }
-                            val fileOutputStream = FileOutputStream(pngFile)
-                            mBitmap!!.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
-                            tessBaseAPI.clear()
-                        }
-                    }
-
-                    override fun onFailure(p0: Int) {
-                    }
-                }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    takeScreenshot(
-                        Display.DEFAULT_DISPLAY,
-                        applicationContext.mainExecutor,
-                        takeScreenshotCallback
-                    )
-                }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                takeScreenshot(
+                    Display.DEFAULT_DISPLAY,
+                    threadPoolExecutor,
+                    takeScreenshotCallback
+                )
             }
         }
     }
