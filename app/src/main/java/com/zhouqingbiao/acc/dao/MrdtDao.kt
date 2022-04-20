@@ -11,5 +11,5 @@ interface MrdtDao {
     fun insert(vararg mrdt: Mrdt)
 
     @Query("SELECT * FROM mrdt WHERE t = :t AND ts = :ts")
-    fun findByTs(t: String, ts: String): Mrdt
+    fun findByTs(t: String, ts: String): List<Mrdt>
 }

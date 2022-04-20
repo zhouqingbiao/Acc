@@ -25,13 +25,6 @@ import java.util.concurrent.Executor
 class AccService : AccessibilityService() {
     var tessBaseAPI = TessBaseAPI()
 
-    var mrdtDatabase = Room.databaseBuilder(
-        applicationContext,
-        MrdtDatabase::class.java, "mrdtDatabase"
-    ).build()
-
-    var mrdtDao = mrdtDatabase.mrdtDao()
-
     private var step = "开始获取积分"
 
     private var ywc = "已完成"
@@ -122,6 +115,11 @@ class AccService : AccessibilityService() {
 
     // 文章次数
     private var wzcs = 0
+
+    private var roomId: Long = 0
+
+    // 每日次数
+    private var mrcs = 0
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -589,7 +587,7 @@ class AccService : AccessibilityService() {
             onDispatchGesture(900F, 950F, 0F, 0F, 50, 50)
             step = "进入每日答题"
         }
-        if (step == "进入每日答题") {
+        if (step == "进入每日答题" && mrcs < 3) {
             sleep(1000)
             onDispatchGesture(220F, 700F, 0F, 0F, 50, 50)
             sleep(1000)
@@ -598,7 +596,6 @@ class AccService : AccessibilityService() {
                 "查看提示"
             )
             if (temp != null) {
-                println(temp.parent.parent.getChild(0).getChild(0).text)
                 if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     step = "点击查看提示"
                 }
@@ -619,15 +616,58 @@ class AccService : AccessibilityService() {
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "查看提示"
                 )
-                val mrdt: Mrdt = mrdtDao.findByTs("多选题", "aaaaa")
-                println(mrdt.t)
-                println(mrdt.ts)
-                println(mrdt.da)
                 if (temp != null) {
-                    println(
+                    val t = temp.parent.parent.getChild(0).getChild(0).text
+                    val ts =
                         temp.parent.parent.parent.parent.getChild(2).getChild(1).getChild(0).text
+                    val mrdtDatabase = Room.databaseBuilder(
+                        applicationContext,
+                        MrdtDatabase::class.java, "MrdtDatabase"
+                    ).allowMainThreadQueries().build()
+
+                    val mrdtDao = mrdtDatabase.mrdtDao()
+                    val mrdt: List<Mrdt> = mrdtDao.findByTs(
+                        "${temp.parent.parent.getChild(0).getChild(0).text}",
+                        "${
+                            temp.parent.parent.parent.parent.getChild(2).getChild(1)
+                                .getChild(0).text
+                        }"
                     )
-                    step = "1111"
+                    if (mrdt.size == 1) {
+                        println(mrdt[0].t)
+                        println(mrdt[0].ts)
+                        println(mrdt[0].da)
+                    }
+                    if (mrdt.isEmpty()) {
+                        mrdtDao.insert(Mrdt(0, t.toString(), ts.toString(), ""))
+                        val aaa: List<Mrdt> = mrdtDao.findByTs(
+                            "${temp.parent.parent.getChild(0).getChild(0).text}",
+                            "${
+                                temp.parent.parent.parent.parent.getChild(2).getChild(1)
+                                    .getChild(0).text
+                            }"
+                        )
+                        if (aaa.size == 1) {
+                            println(aaa[0].id)
+                            println(aaa[0].t)
+                            println(aaa[0].ts)
+                            println(aaa[0].da)
+
+                            roomId = aaa[0].id
+                            takeScreenshotToFile()
+                            sleep(3000)
+                        }
+                    }
+                    sleep(1000)
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        sleep(1000)
+                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                            sleep(1000)
+                            onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+                            step = "进入每日答题"
+                            mrcs++
+                        }
+                    }
                 }
             }
         }
@@ -720,14 +760,6 @@ class AccService : AccessibilityService() {
     override fun onInterrupt() {
         // 在这里结束tessBaseAPI
         tessBaseAPI.end()
-    }
-
-    override fun takeScreenshot(
-        displayId: Int,
-        executor: Executor,
-        callback: TakeScreenshotCallback
-    ) {
-        super.takeScreenshot(displayId, executor, callback)
     }
 
     // 正式可变List
@@ -918,6 +950,43 @@ class AccService : AccessibilityService() {
         return temp
     }
 
+    private fun takeScreenshotToFile(){
+        var mBitmap: Bitmap?
+        val takeScreenshotCallback =
+            @RequiresApi(Build.VERSION_CODES.R)
+            object : TakeScreenshotCallback {
+                override fun onSuccess(p0: ScreenshotResult) {
+                    val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
+                    mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
+                    if (mBitmap != null) {
+                        val file = File(filesDir.path + File.separator + "png")
+                        if (!file.exists()) {
+                            file.mkdirs()
+                        }
+                        val pngFile = File(file.path + File.separator + roomId + ".png")
+                        if (!pngFile.exists()) {
+                            pngFile.createNewFile()
+                        }
+                        val fileOutputStream = FileOutputStream(pngFile)
+                        mBitmap!!.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+                        tessBaseAPI.clear()
+                    }
+                }
+
+                override fun onFailure(p0: Int) {
+                }
+            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                takeScreenshot(
+                    Display.DEFAULT_DISPLAY,
+                    applicationContext.mainExecutor,
+                    takeScreenshotCallback
+                )
+            }
+        }
+    }
+
     /**
      * TessBaseAPI
      */
@@ -959,11 +1028,55 @@ class AccService : AccessibilityService() {
                     }
                 }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                takeScreenshot(
-                    Display.DEFAULT_DISPLAY,
-                    applicationContext.mainExecutor,
-                    takeScreenshotCallback
-                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    takeScreenshot(
+                        Display.DEFAULT_DISPLAY,
+                        applicationContext.mainExecutor,
+                        takeScreenshotCallback
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * TessBaseAPIToFile
+     */
+    private inner class ThreadTessBaseAPIToFile() : Thread() {
+        override fun run() {
+            var mBitmap: Bitmap?
+            val takeScreenshotCallback =
+                @RequiresApi(Build.VERSION_CODES.R)
+                object : TakeScreenshotCallback {
+                    override fun onSuccess(p0: ScreenshotResult) {
+                        val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
+                        mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
+                        if (mBitmap != null) {
+                            val file = File(filesDir.path + File.separator + "png")
+                            if (!file.exists()) {
+                                file.mkdirs()
+                            }
+                            val pngFile = File(file.path + File.separator + roomId + ".png")
+                            if (!pngFile.exists()) {
+                                pngFile.createNewFile()
+                            }
+                            val fileOutputStream = FileOutputStream(pngFile)
+                            mBitmap!!.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+                            tessBaseAPI.clear()
+                        }
+                    }
+
+                    override fun onFailure(p0: Int) {
+                    }
+                }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    takeScreenshot(
+                        Display.DEFAULT_DISPLAY,
+                        applicationContext.mainExecutor,
+                        takeScreenshotCallback
+                    )
+                }
             }
         }
     }
