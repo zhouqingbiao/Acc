@@ -162,7 +162,7 @@ class AccService : AccessibilityService() {
 
         // 初始化
 
-        val inputStream = applicationContext.assets.open("chi_sim.traineddata")
+        var inputStream = applicationContext.assets.open("chi_sim.traineddata")
         var file = File(filesDir.path, File.separator + "tessdata")
         if (!file.exists()) {
             file.mkdirs()
@@ -185,8 +185,8 @@ class AccService : AccessibilityService() {
 
         mrdtDatabase = Room.databaseBuilder(
             applicationContext,
-            MrdtDatabase::class.java, "MrdtDatabase"
-        ).allowMainThreadQueries().build()
+            MrdtDatabase::class.java, "xxqg"
+        ).createFromAsset("xxqg.db").allowMainThreadQueries().build()
 
         mrdtDao = mrdtDatabase!!.mrdtDao()
 
@@ -636,9 +636,9 @@ class AccService : AccessibilityService() {
             sleep(1000)
             onDispatchGesture(220F, 700F, 0F, 0F, 50, 50)
             sleep(1000)
-            val temp = findByTextOfContains(
+            val temp = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "查看提示", ""
+                "查看提示"
             )
             if (temp != null) {
                 if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -649,9 +649,9 @@ class AccService : AccessibilityService() {
         if (step == "点击查看提示") {
             sleep(1000)
             if (rootInActiveWindow != null) {
-                val temp = findByTextOfContains(
+                val temp = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "提示", "查看提示"
+                    "提示"
                 )
                 if (temp != null) {
                     t = temp.parent.parent.parent.getChild(0).getChild(0).getChild(0)
@@ -661,15 +661,23 @@ class AccService : AccessibilityService() {
                     println(ts)
                     if (ts.contains("请观看视频")) {
                         println("$ts=${ts.length}")
+                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                            sleep(1000)
+                            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                sleep(1000)
+                                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+                                step = "进入每日答题"
+                            }
+                        }
                     }
-                    if (!ts.contains("请观看视频")) {
+                    if (ts != "请观看视频") {
                         val mrdt: List<Mrdt> = mrdtDao!!.findByTs(t, ts)
                         if (mrdt.size == 1) {
                             t = mrdt[0].t
                             da = mrdt[0].da
                         }
                         if (mrdt.isEmpty()) {
-                            mrdtDao!!.insert(Mrdt(0, t.toString(), ts.toString(), ""))
+                            mrdtDao!!.insert(Mrdt(0, t, ts, ""))
                             val insert: List<Mrdt> = mrdtDao!!.findByTs(t, ts)
                             if (insert.size == 1) {
                                 roomId = insert[0].id
@@ -700,18 +708,60 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "每日答题答案") {
-            if (!ts.contains("请观看视频")) {
+            sleep(1000)
+            if (da != "") {
                 if (t == "单选题") {
-                    println(t)
-                    println(da)
+                    println("$t==========$da")
+                    val temp = findByText(
+                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                        da
+                    )
+                    temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    step = "点击确定或完成"
                 }
                 if (t == "多选题") {
-                    println(t)
-                    println(da)
+                    println("$t==========$da")
+                    val daSplit = da.split("|")
+                    (daSplit.indices).forEach { index ->
+                        val temp = findByText(
+                            rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                            daSplit[index]
+                        )
+                        temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    }
+                    step = "点击确定或完成"
                 }
                 if (t == "填空题") {
-                    println(t)
-                    println(da)
+                    println("$t==========$da")
+                    step = "点击确定或完成1111"
+                }
+            } else {
+                step = "点击确定或完成1111"
+            }
+        }
+        if (step == "点击确定或完成") {
+            var temp = findByText(
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                "确定"
+            )
+            if (temp != null) {
+                if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    step = "点击查看提示"
+                }
+            } else {
+                temp = findByText(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "提交"
+                )
+                if (temp != null) {
+                    if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        sleep(1000)
+                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                            sleep(1000)
+                            step = "进入每周答题1111"
+                        }
+                    }
                 }
             }
         }
@@ -922,36 +972,8 @@ class AccService : AccessibilityService() {
         var temp: AccessibilityNodeInfo? = null
         mutableListAccessibilityNodeInfo.forEach { ani ->
             if (ani.text != null) {
-                if (ani.text == text) {
+                if (ani.text.toString() == text) {
                     temp = ani
-                }
-            }
-        }
-        mutableListAccessibilityNodeInfo.clear()
-        return temp
-    }
-
-    /**
-     * 根据Text查找控件 包含一些 排除一些
-     * contains
-     * exclude
-     */
-    private fun findByTextOfContains(
-        mutableList: MutableList<AccessibilityNodeInfo>,
-        contains: String, exclude: String
-    ): AccessibilityNodeInfo? {
-        recycle(mutableList)
-        var temp: AccessibilityNodeInfo? = null
-        mutableListAccessibilityNodeInfo.forEach { ani ->
-            if (ani.text != null) {
-                if (exclude != "") {
-                    if (ani.text.contains(contains) && !ani.text.contains(exclude)) {
-                        temp = ani
-                    }
-                } else {
-                    if (ani.text.contains(contains)) {
-                        temp = ani
-                    }
                 }
             }
         }
