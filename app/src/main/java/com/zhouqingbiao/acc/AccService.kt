@@ -638,7 +638,7 @@ class AccService : AccessibilityService() {
             sleep(1000)
             val zql = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "正确率：100%"
+                "正确率：100%", false
             )
             if (zql != null) {
                 if (performGlobalAction(GLOBAL_ACTION_BACK)) {
@@ -647,7 +647,7 @@ class AccService : AccessibilityService() {
             }
             val temp = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "查看提示"
+                "查看提示", false
             )
             if (temp != null) {
                 if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -660,14 +660,14 @@ class AccService : AccessibilityService() {
             if (rootInActiveWindow != null) {
                 val temp = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "提示"
+                    "提示", true
                 )
                 if (temp != null) {
                     t = temp.parent.parent.parent.getChild(0).getChild(0).getChild(0)
                         .getChild(0).text.toString()
                     ts = temp.parent.parent.getChild(1).getChild(0).text.toString()
-                    println(t)
-                    println(ts)
+                    // println(t)
+                    // println(ts)
                     if (ts == "请观看视频") {
                         println("$ts=${ts.length}")
                         if (performGlobalAction(GLOBAL_ACTION_BACK)) {
@@ -717,7 +717,7 @@ class AccService : AccessibilityService() {
                 if (t == "单选题") {
                     val temp = findByText(
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                        da
+                        da, false
                     )
                     temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                     step = "点击确定"
@@ -727,7 +727,7 @@ class AccService : AccessibilityService() {
                     (daSplit.indices).forEach { index ->
                         val temp = findByText(
                             rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            daSplit[index]
+                            daSplit[index], false
                         )
                         temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                     }
@@ -759,7 +759,7 @@ class AccService : AccessibilityService() {
             sleep(1000)
             var temp = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "确定"
+                "确定", false
             )
             if (temp != null) {
                 if (temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -955,7 +955,7 @@ class AccService : AccessibilityService() {
         recycle(mutableList)
         var temp: AccessibilityNodeInfo? = null
         mutableListAccessibilityNodeInfo.forEach { ani ->
-            if (ani.contentDescription != null) {
+            if (ani.contentDescription != null && ani.contentDescription != "") {
                 if (ani.contentDescription.toString() == contentDescription) {
                     temp = ani
                 }
@@ -970,14 +970,17 @@ class AccService : AccessibilityService() {
      */
     private fun findByText(
         mutableList: MutableList<AccessibilityNodeInfo>,
-        text: String
+        text: String, output: Boolean
     ): AccessibilityNodeInfo? {
         recycle(mutableList)
         var temp: AccessibilityNodeInfo? = null
         mutableListAccessibilityNodeInfo.forEach { ani ->
-            if (ani.text != null) {
+            if (ani.text != null && ani.text.toString() != "") {
                 if (ani.text.toString() == text) {
                     temp = ani
+                }
+                if (output) {
+                    println(ani.text)
                 }
             }
         }
