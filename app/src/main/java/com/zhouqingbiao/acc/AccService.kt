@@ -651,11 +651,11 @@ class AccService : AccessibilityService() {
             )
             if (temp != null) {
                 if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    step = "点击查看提示"
+                    step = "获取提示"
                 }
             }
         }
-        if (step == "点击查看提示") {
+        if (step == "获取提示") {
             sleep(1000)
             if (rootInActiveWindow != null) {
                 val temp = findByText(
@@ -757,14 +757,14 @@ class AccService : AccessibilityService() {
         }
         if (step == "点击确定") {
             sleep(1000)
-            var temp = findByText(
+            val temp = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "确定", false
             )
             if (temp != null) {
                 if (temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     sleep(1000)
-                    step = "点击查看提示"
+                    step = "获取提示"
                 }
             }
         }
