@@ -636,6 +636,7 @@ class AccService : AccessibilityService() {
             sleep(1000)
             onDispatchGesture(220F, 700F, 0F, 0F, 50, 50)
             sleep(1000)
+            step = "点击查看提示"
             val zql = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "正确率：100%", false
@@ -645,6 +646,8 @@ class AccService : AccessibilityService() {
                     step = "进入每周答题"
                 }
             }
+        }
+        if (step == "点击查看提示") {
             val temp = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "查看提示", false
@@ -764,7 +767,7 @@ class AccService : AccessibilityService() {
             if (temp != null) {
                 if (temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     sleep(1000)
-                    step = "获取提示"
+                    step = "点击查看提示"
                 }
             }
         }
