@@ -153,8 +153,9 @@ class AccService : AccessibilityService() {
 
     private var roomId: Long = 0
 
-    // 每日次数
-    private var mrcs = 0
+    var t = ""
+    var ts = ""
+    var da = ""
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -631,7 +632,7 @@ class AccService : AccessibilityService() {
             onDispatchGesture(900F, 950F, 0F, 0F, 50, 50)
             step = "进入每日答题"
         }
-        if (step == "进入每日答题" && mrcs < 20) {
+        if (step == "进入每日答题") {
             sleep(1000)
             onDispatchGesture(220F, 700F, 0F, 0F, 50, 50)
             sleep(1000)
@@ -639,7 +640,6 @@ class AccService : AccessibilityService() {
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "查看提示", ""
             )
-
             if (temp != null) {
                 if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     step = "点击查看提示"
@@ -653,17 +653,24 @@ class AccService : AccessibilityService() {
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "提示", "查看提示"
                 )
-                try {
-                    if (temp != null) {
-                        val t = temp.parent.parent.parent.getChild(0).getChild(0).getChild(0)
-                            .getChild(0).text
-                        val ts = temp.parent.parent.getChild(1).getChild(0).text
-                        println(t)
-                        println(ts)
-                        val mrdt: List<Mrdt> = mrdtDao!!.findByTs("$t", "$ts")
+                if (temp != null) {
+                    t = temp.parent.parent.parent.getChild(0).getChild(0).getChild(0)
+                        .getChild(0).text.toString()
+                    ts = temp.parent.parent.getChild(1).getChild(0).text.toString()
+                    println(t)
+                    println(ts)
+                    if (ts.contains("请观看视频")) {
+                        println("$ts=${ts.length}")
+                    }
+                    if (!ts.contains("请观看视频")) {
+                        val mrdt: List<Mrdt> = mrdtDao!!.findByTs(t, ts)
+                        if (mrdt.size == 1) {
+                            t = mrdt[0].t
+                            da = mrdt[0].da
+                        }
                         if (mrdt.isEmpty()) {
                             mrdtDao!!.insert(Mrdt(0, t.toString(), ts.toString(), ""))
-                            val insert: List<Mrdt> = mrdtDao!!.findByTs("$t", "$ts")
+                            val insert: List<Mrdt> = mrdtDao!!.findByTs(t, ts)
                             if (insert.size == 1) {
                                 roomId = insert[0].id
                                 takeScreenshotToFile("mrdt", 1)
@@ -674,24 +681,37 @@ class AccService : AccessibilityService() {
                                         sleep(1000)
                                         onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
                                         step = "进入每日答题"
-                                        mrcs++
                                     }
                                 }
                             }
                         } else {
                             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                                 sleep(1000)
-                                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                                    sleep(1000)
-                                    onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
-                                    step = "进入每日答题"
-                                    mrcs++
-                                }
+                                step = "每日答题答案"
+//                                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+//                                    sleep(1000)
+//                                    onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+//                                    step = "进入每日答题"
+//                                }
                             }
                         }
                     }
-                } catch (e: Exception) {
-
+                }
+            }
+        }
+        if (step == "每日答题答案") {
+            if (!ts.contains("请观看视频")) {
+                if (t == "单选题") {
+                    println(t)
+                    println(da)
+                }
+                if (t == "多选题") {
+                    println(t)
+                    println(da)
+                }
+                if (t == "填空题") {
+                    println(t)
+                    println(da)
                 }
             }
         }
