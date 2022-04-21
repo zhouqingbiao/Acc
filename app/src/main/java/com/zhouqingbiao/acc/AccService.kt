@@ -669,10 +669,12 @@ class AccService : AccessibilityService() {
                     t = temp.parent.parent.parent.getChild(0).getChild(0).getChild(0)
                         .getChild(0).text.toString()
                     ts = temp.parent.parent.getChild(1).getChild(0).text.toString()
+                        .replace("\n", "")
+                        .replace("\r", "")
                     // println(t)
                     // println(ts)
                     if (ts == "请观看视频") {
-                        println("$ts=${ts.length}")
+                        // println("$ts=${ts.length}")
                         if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                             sleep(1000)
                             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
@@ -743,7 +745,7 @@ class AccService : AccessibilityService() {
                     )
                     val daSplit = da.split("|")
                     (daSplit.indices).forEach { index ->
-                        println(daSplit[index])
+                        // println(daSplit[index])
                         val bundle = Bundle()
                         bundle.putCharSequence(
                             AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,

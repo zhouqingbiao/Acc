@@ -8,6 +8,6 @@
     android:canRetrieveWindowContent="true"
     android:canTakeScreenshot="true"
     android:description="@string/accessibility_service_description"
-    android:notificationTimeout="1000"
+    android:notificationTimeout="100"
     android:packageNames="cn.xuexi.android"
     android:settingsActivity="com.example.android.accessibility.ServiceSettingsActivity" />
