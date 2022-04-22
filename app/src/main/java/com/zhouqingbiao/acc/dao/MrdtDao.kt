@@ -1,6 +1,7 @@
 package com.zhouqingbiao.acc.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import com.zhouqingbiao.acc.entity.Mrdt
@@ -12,4 +13,7 @@ interface MrdtDao {
 
     @Query("SELECT * FROM mrdt WHERE t = :t AND ts = :ts")
     fun findByTs(t: String, ts: String): List<Mrdt>
+
+    @Delete()
+    fun deleteById(id: Long)
 }
