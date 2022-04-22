@@ -663,18 +663,19 @@ class AccService : AccessibilityService() {
             if (rootInActiveWindow != null) {
                 val temp = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "提示", true
+                    "提示", false
                 )
                 if (temp != null) {
                     t = temp.parent.parent.parent.getChild(0).getChild(0).getChild(0)
                         .getChild(0).text.toString()
                     ts = temp.parent.parent.getChild(1).getChild(0).text.toString()
-                        .replace("\n", "")
-                        .replace("\r", "")
-                    // println(t)
-                    // println(ts)
+                    if (ts == "") {
+                        val view = temp.parent.parent.getChild(1).getChild(0)
+                        (0 until view.childCount).forEach { index ->
+                            ts += view.getChild(index).text.toString()
+                        }
+                    }
                     if (ts == "请观看视频") {
-                        // println("$ts=${ts.length}")
                         if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                             sleep(1000)
                             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
@@ -691,6 +692,10 @@ class AccService : AccessibilityService() {
                             da = mrdt[0].da
                         }
                         if (mrdt.isEmpty()) {
+                            findByText(
+                                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                                "提示", true
+                            )
                             mrdtDao!!.insert(Mrdt(0, t, ts, ""))
                             val insert: List<Mrdt> = mrdtDao!!.findByTs(t, ts)
                             if (insert.size == 1) {
@@ -706,6 +711,7 @@ class AccService : AccessibilityService() {
                                     }
                                 }
                             }
+                            // 随机答题 然后拼出答案
                         } else {
                             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                                 sleep(1000)
@@ -717,7 +723,6 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "每日答题答案") {
-            println("$t==========$da")
             if (da != "") {
                 if (t == "单选题") {
                     val temp = findByText(
@@ -743,26 +748,53 @@ class AccService : AccessibilityService() {
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                         "android.widget.EditText"
                     )
-                    val daSplit = da.split("|")
-                    (daSplit.indices).forEach { index ->
-                        // println(daSplit[index])
+                    if (da.indexOf("|") != -1) {
+                        val daSplit = da.split("|")
+                        (daSplit.indices).forEach { index ->
+                            val bundle = Bundle()
+                            bundle.putCharSequence(
+                                AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                                daSplit[index]
+                            )
+                            temp[index].performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
+                        }
+                        step = "点击确定"
+                    } else {
                         val bundle = Bundle()
                         bundle.putCharSequence(
                             AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
-                            daSplit[index]
+                            da
                         )
-                        temp[index].performAction(AccessibilityNodeInfo.ACTION_SET_TEXT)
+                        temp[0].performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
+                        step = "点击确定"
                     }
-                    step = "点击确定"
                 }
             } else {
+                // 待处理
                 step = "无答案"
+                val temp = findByText(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "查看提示", false
+                )
+                if (temp != null) {
+                    if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        sleep(1000)
+                        takeScreenshotToFile("mrdt", 3)
+                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                            sleep(1000)
+                            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                sleep(1000)
+                                step = "进入每日答题"
+                            }
+                        }
+                    }
+                }
             }
 
         }
         if (step == "点击确定") {
             sleep(1000)
-            val temp = findByText(
+            var temp = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "确定", false
             )
@@ -770,6 +802,18 @@ class AccService : AccessibilityService() {
                 if (temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     sleep(1000)
                     step = "点击查看提示"
+                }
+            } else {
+                temp = findByText(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "下一题", false
+                )
+                if (temp != null) {
+                    takeScreenshotToFile("mrdt", 3)
+                    if (temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        sleep(1000)
+                        step = "点击查看提示"
+                    }
                 }
             }
         }
@@ -1040,6 +1084,10 @@ class AccService : AccessibilityService() {
                         if (index == 2) {
                             pngFile =
                                 File(file.path + File.separator + roomId + "_" + roomId + ".png")
+                        }
+                        if (index == 2) {
+                            pngFile =
+                                File(file.path + File.separator + roomId + "_" + roomId + "_" + roomId + ".png")
                         }
                         if (pngFile != null) {
                             if (!pngFile.exists()) {
