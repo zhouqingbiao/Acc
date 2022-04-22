@@ -631,6 +631,7 @@ class AccService : AccessibilityService() {
             sleep(1000)
             onDispatchGesture(900F, 950F, 0F, 0F, 50, 50)
             step = "进入每日答题"
+            step = "进入挑战答题"
         }
         if (step == "进入每日答题") {
             sleep(1000)
@@ -946,9 +947,39 @@ class AccService : AccessibilityService() {
             sleep(1000)
             onDispatchGesture(800F, 1600F, 0F, 0F, 50, 50)
             sleep(3000)
-            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
-                step = "结束"
+            step = "选择挑战答题答案"
+        }
+        if (step == "选择挑战答题答案") {
+            val listView = findByClassName(
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                "android.widget.ListView"
+            )[0]
+            val random = (0 until listView.childCount).random()
+            t = listView.parent.getChild(0).text.toString()
+            da = listView.getChild(random).getChild(0).getChild(1).text.toString()
+            if (listView.getChild(random).getChild(0)
+                    .performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            ) {
+                sleep(3000)
+                val jsbj = findByText(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "结束本局", false
+                )
+                if (jsbj == null) {
+                    // tzdtDao!!.insert(Tzdt(0,t,da))
+                    println(t)
+                    println(da)
+                    step = "选择挑战答题答案"
+                } else {
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        sleep(1000)
+                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                            sleep(1000)
+                            step = "进入挑战答题"
+                            sleep(8000)
+                        }
+                    }
+                }
             }
         }
     }
@@ -968,8 +999,7 @@ class AccService : AccessibilityService() {
      */
     private fun recycle(mlani: MutableList<AccessibilityNodeInfo>) {
         // 临时可变List
-        val mutableList: MutableList<AccessibilityNodeInfo> =
-            mutableListOf()
+        val mutableList: MutableList<AccessibilityNodeInfo> = mutableListOf()
 
         // 开始遍历
         mlani.forEach { ani ->
