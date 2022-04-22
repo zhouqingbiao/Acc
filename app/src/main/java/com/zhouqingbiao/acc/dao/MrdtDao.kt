@@ -12,8 +12,11 @@ interface MrdtDao {
     fun insert(vararg mrdt: Mrdt)
 
     @Query("SELECT * FROM mrdt WHERE t = :t AND ts = :ts")
-    fun findByTs(t: String, ts: String): List<Mrdt>
+    fun findByTAndTs(t: String, ts: String): List<Mrdt>
 
-    @Delete()
-    fun deleteById(id: Long)
+    @Query("SELECT * FROM mrdt WHERE id = :id")
+    fun findById(id: Long): Mrdt
+
+    @Delete
+    fun delete(vararg mrdt: Mrdt)
 }

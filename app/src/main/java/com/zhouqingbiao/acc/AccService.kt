@@ -190,7 +190,7 @@ class AccService : AccessibilityService() {
 
         mrdtDao = mrdtDatabase!!.mrdtDao()
 
-        mrdtDao!!.findByTs("", "")
+        mrdtDao!!.findByTAndTs("", "")
 
         step = "开始获取积分"
     }
@@ -686,7 +686,13 @@ class AccService : AccessibilityService() {
                         }
                     }
                     if (ts != "请观看视频") {
-                        val mrdt: List<Mrdt> = mrdtDao!!.findByTs(t, ts)
+                        val mrdt: List<Mrdt> = mrdtDao!!.findByTAndTs(t, ts)
+                        if (mrdt.size > 1) {
+                            mrdt.forEach { m ->
+                                mrdtDao!!.delete(mrdtDao!!.findById(m.id))
+                            }
+                            step = "查找每日答案"
+                        }
                         if (mrdt.size == 1) {
                             t = mrdt[0].t
                             da = mrdt[0].da
@@ -694,40 +700,13 @@ class AccService : AccessibilityService() {
                             if (da == "") {
                                 step = "查找每日答案"
                             }
-                        } else {
+                        }
+                        if (mrdt.isEmpty()) {
                             step = "查找每日答案"
                         }
                         if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                             sleep(1000)
                         }
-//                        if (mrdt.isEmpty()) {
-//                            findByText(
-//                                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-//                                "提示", true
-//                            )
-//                            mrdtDao!!.insert(Mrdt(0, t, ts, ""))
-//                            val insert: List<Mrdt> = mrdtDao!!.findByTs(t, ts)
-//                            if (insert.size == 1) {
-//                                roomId = insert[0].id
-//                                takeScreenshotToFile("mrdt", 1)
-//                                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-//                                    sleep(1000)
-//                                    takeScreenshotToFile("mrdt", 2)
-//                                    step = "查找每日答案"
-////                                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-////                                        sleep(1000)
-////                                        onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
-////                                        step = "进入每日答题"
-////                                    }
-//                                }
-//                            }
-//                            // 随机答题 然后拼出答案
-//                        } else {
-//                            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-//                                sleep(1000)
-//                                step = "每日答题答案"
-//                            }
-//                        }
                     }
                 }
             }
@@ -823,7 +802,7 @@ class AccService : AccessibilityService() {
                         if (xyt == null) {
                             mrdtDao!!.insert(Mrdt(0, t, ts, azMutableMapOf.getValue("A.")))
                             println("$t====$ts====${azMutableMapOf.getValue("A.")}")
-                            step = "从每日答题返回我要答题"
+                            step = "点击查看提示"
                         }
                     }
                 }
@@ -921,7 +900,7 @@ class AccService : AccessibilityService() {
                     "下一题", false
                 )
                 if (temp != null) {
-                    mrdtDao!!.deleteById(roomId)
+                    mrdtDao!!.delete(mrdtDao!!.findById(roomId))
                     if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                         sleep(1000)
                         onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
