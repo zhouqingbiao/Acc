@@ -14,10 +14,13 @@ import androidx.annotation.RequiresApi
 import androidx.room.Room
 import com.googlecode.tesseract.android.TessBaseAPI
 import com.zhouqingbiao.acc.dao.MrdtDao
-import com.zhouqingbiao.acc.database.MrdtDatabase
+import com.zhouqingbiao.acc.dao.TzdtDao
+import com.zhouqingbiao.acc.database.XxqgDatabase
 import com.zhouqingbiao.acc.entity.Mrdt
+import com.zhouqingbiao.acc.entity.Tzdt
 import org.jsoup.Jsoup
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
@@ -29,9 +32,11 @@ import java.util.concurrent.TimeUnit
 class AccService : AccessibilityService() {
     var tessBaseAPI = TessBaseAPI()
 
-    var mrdtDatabase: MrdtDatabase? = null
+    var xxqgDatabase: XxqgDatabase? = null
 
     var mrdtDao: MrdtDao? = null
+
+    var tzdtDao: TzdtDao? = null
 
     /*
      * Gets the number of available cores
@@ -162,7 +167,7 @@ class AccService : AccessibilityService() {
 
         // 初始化
 
-        var inputStream = applicationContext.assets.open("chi_sim.traineddata")
+        val inputStream = applicationContext.assets.open("chi_sim.traineddata")
         var file = File(filesDir.path, File.separator + "tessdata")
         if (!file.exists()) {
             file.mkdirs()
@@ -183,14 +188,25 @@ class AccService : AccessibilityService() {
 
         tessBaseAPI.init(filesDir.path, "chi_sim")
 
-        mrdtDatabase = Room.databaseBuilder(
-            applicationContext,
-            MrdtDatabase::class.java, "xxqg"
-        ).createFromAsset("xxqg.db").allowMainThreadQueries().build()
 
-        mrdtDao = mrdtDatabase!!.mrdtDao()
+        try {
+            applicationContext.assets.open("Xxqg.db")
+            xxqgDatabase =
+                Room.databaseBuilder(applicationContext, XxqgDatabase::class.java, "Xxqg")
+                    .createFromAsset("Xxqg.db").allowMainThreadQueries().build()
+        } catch (e: FileNotFoundException) {
+            xxqgDatabase =
+                Room.databaseBuilder(applicationContext, XxqgDatabase::class.java, "Xxqg")
+                    .allowMainThreadQueries().build()
+        }
+
+        mrdtDao = xxqgDatabase!!.mrdtDao()
 
         mrdtDao!!.findByTAndTs("", "")
+
+        tzdtDao = xxqgDatabase!!.tzdtDao()
+
+        tzdtDao!!.findByT("")
 
         step = "开始获取积分"
     }
@@ -945,9 +961,20 @@ class AccService : AccessibilityService() {
         }
         if (step == "进入挑战答题") {
             sleep(1000)
-            onDispatchGesture(800F, 1600F, 0F, 0F, 50, 50)
-            sleep(3000)
-            step = "选择挑战答题答案"
+            val temp =
+                findByText(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "排行榜",
+                    false
+                )
+            if (temp != null) {
+                // srs = 8
+                // srdz = 9
+                if (temp.parent.getChild(10).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(3000)
+                    step = "选择挑战答题答案"
+                }
+            }
         }
         if (step == "选择挑战答题答案") {
             val listView = findByClassName(
@@ -957,26 +984,51 @@ class AccService : AccessibilityService() {
             val random = (0 until listView.childCount).random()
             t = listView.parent.getChild(0).text.toString()
             da = listView.getChild(random).getChild(0).getChild(1).text.toString()
-            if (listView.getChild(random).getChild(0)
-                    .performAction(AccessibilityNodeInfo.ACTION_CLICK)
-            ) {
-                sleep(3000)
-                val jsbj = findByText(
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "结束本局", false
-                )
-                if (jsbj == null) {
-                    // tzdtDao!!.insert(Tzdt(0,t,da))
-                    println(t)
-                    println(da)
-                    step = "选择挑战答题答案"
-                } else {
-                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                        sleep(1000)
+            val tzdt = tzdtDao!!.findByT(t)
+            var delete = false
+            if (tzdt.size > 1) {
+                tzdt.forEach { t ->
+                    tzdtDao!!.delete(tzdtDao!!.findById(t.id))
+                }
+            }
+            if (tzdt.size == 1) {
+                roomId = tzdt[0].id
+                da = tzdt[0].da
+                delete = true
+            }
+            var tzdtString = ""
+            (0 until listView.childCount).forEach { index ->
+                tzdtString += listView.getChild(index).getChild(0).getChild(1).text.toString() + "|"
+            }
+            tzdtString = tzdtString.substring(0, tzdtString.length - 1)
+            val temp = findByText(
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                da,
+                false
+            )
+            if (temp != null) {
+                if (temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(3000)
+                    val jsbj = findByText(
+                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                        "结束本局", false
+                    )
+                    if (jsbj == null) {
+                        tzdtDao!!.insert(Tzdt(0, t, da))
+                        step = "选择挑战答题答案"
+                    } else {
+                        if (delete) {
+                            tzdtDao!!.delete(tzdtDao!!.findById(roomId))
+                        }
+                        println(t)
+                        println(tzdtString)
                         if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                             sleep(1000)
-                            step = "进入挑战答题"
-                            sleep(8000)
+                            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                sleep(1000)
+                                step = "进入挑战答题"
+                                sleep(8000)
+                            }
                         }
                     }
                 }
