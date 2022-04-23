@@ -508,6 +508,8 @@ class AccService : AccessibilityService() {
                 if (temp.size > 0) {
                     if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                         step = "点击订阅"
+                        // 跳过订阅
+                        step = "点击我要答题"
                     }
                 }
             }
