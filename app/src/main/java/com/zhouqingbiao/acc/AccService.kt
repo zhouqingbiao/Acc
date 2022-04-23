@@ -645,21 +645,37 @@ class AccService : AccessibilityService() {
         }
         if (step == "点击我要答题") {
             sleep(1000)
-            onDispatchGesture(900F, 950F, 0F, 0F, 50, 50)
-            step = "进入每日答题"
-            step = "进入挑战答题"
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("我要答题")
+            if (temp != null) {
+                if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    step = "进入每日答题"
+                }
+            }
+//            step = "进入每周答题"
+//            step = "进入专项答题"
+//            step = "进入四人赛"
+//            step = "进入双人对战"
+//            step = "进入挑战答题"
         }
         if (step == "进入每日答题") {
-            sleep(1000)
-            onDispatchGesture(220F, 700F, 0F, 0F, 50, 50)
-            sleep(1000)
-            step = "点击查看提示"
+            val temp = findByText(
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                "每日答题", false
+            )
+            if (temp != null) {
+                if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    step = "点击查看提示"
+                }
+            }
             val zql = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "正确率：100%", false
             )
             if (zql != null) {
                 if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                    sleep(1000)
                     step = "进入每周答题"
                 }
             }
@@ -692,17 +708,11 @@ class AccService : AccessibilityService() {
                             ts += view.getChild(index).text.toString()
                         }
                     }
-                    if (ts == "请观看视频") {
-                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                            sleep(1000)
-                            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                                sleep(1000)
-                                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
-                                step = "进入每日答题"
-                            }
-                        }
+                    if (ts == "请观看视频" || ts == "请观看视频。") {
+                        ts = temp.parent.parent.parent.getChild(0).getChild(0).getChild(1)
+                            .getChild(0).text.toString()
                     }
-                    if (ts != "请观看视频") {
+                    if (ts != "") {
                         val mrdt: List<Mrdt> = mrdtDao!!.findByTAndTs(t, ts)
                         if (mrdt.size > 1) {
                             mrdt.forEach { m ->
@@ -743,13 +753,15 @@ class AccService : AccessibilityService() {
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "android.widget.EditText"
                 )
-                if (temp.size > 0) {
+                if (temp.isNotEmpty()) {
                     val bundle = Bundle()
                     bundle.putCharSequence(
                         AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
                         "A"
                     )
-                    temp[0].performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
+                    temp.forEach { t ->
+                        t.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
+                    }
                     sleep(1000)
                     step = "得出每日答题答案"
                 }
@@ -837,10 +849,26 @@ class AccService : AccessibilityService() {
                             "正确答案： ", false
                         )
                         if (zqda != null) {
+                            val temp = findByClassName(
+                                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                                "android.widget.EditText"
+                            )
                             val azString = zqda.text.toString().replace("正确答案： ", "")
-                            mrdtDao!!.insert(Mrdt(0, t, ts, azString))
-                            println("$t====$ts====$azString")
-                            step = "从每日答题返回我要答题"
+                            if (temp.size > 1) {
+                                var zqdaString = ""
+                                azString.split(" ").forEach { az ->
+                                    zqdaString += "$az|"
+                                }
+                                zqdaString = zqdaString.substring(0, zqdaString.length - 1)
+                                mrdtDao!!.insert(Mrdt(0, t, ts, zqdaString))
+                                println("$t====$ts====$zqdaString")
+                                step = "从每日答题返回我要答题"
+                            }
+                            if (temp.size == 1) {
+                                mrdtDao!!.insert(Mrdt(0, t, ts, azString))
+                                println("$t====$ts====$azString")
+                                step = "从每日答题返回我要答题"
+                            }
                         }
                     }
                 }
@@ -849,8 +877,17 @@ class AccService : AccessibilityService() {
         if (step == "从每日答题返回我要答题") {
             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                 sleep(1000)
-                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
-                step = "进入每日答题"
+                // onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+                val tc = findByTextOfContains(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "退出", false
+                )
+                if (tc != null) {
+                    if (tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        sleep(1000)
+                        step = "进入每日答题"
+                    }
+                }
             }
         }
         if (step == "选或填每日答题答案") {
@@ -920,8 +957,18 @@ class AccService : AccessibilityService() {
                     mrdtDao!!.delete(mrdtDao!!.findById(roomId))
                     if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                         sleep(1000)
-                        onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
-                        step = "进入每日答题"
+                        // onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
+                        val tc = findByTextOfContains(
+                            rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                            "退出", false
+                        )
+                        if (tc != null) {
+                            if (tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                                sleep(1000)
+                                step = "进入每日答题"
+                            }
+                        }
+                        // step = "进入每日答题"
                     }
                 }
             }
@@ -944,20 +991,58 @@ class AccService : AccessibilityService() {
         }
         if (step == "进入四人赛") {
             sleep(1000)
-            onDispatchGesture(300F, 1450F, 0F, 0F, 50, 50)
-            sleep(1000)
-            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                step = "进入双人对战"
+            val temp =
+                findByText(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "排行榜",
+                    false
+                )
+            if (temp != null) {
+                if (temp.parent.getChild(8).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    step = "点击四人赛"
+                }
             }
         }
         if (step == "进入双人对战") {
             sleep(1000)
-            onDispatchGesture(800F, 1300F, 0F, 0F, 50, 50)
-            sleep(1000)
-            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
-                step = "进入挑战答题"
+            val temp =
+                findByText(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "排行榜",
+                    false
+                )
+            if (temp != null) {
+                if (temp.parent.getChild(9).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    step = "点击随机匹配"
+                }
             }
+        }
+        if (step == "点击随机匹配") {
+            val temp =
+                findByText(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "随机匹配",
+                    false
+                )
+            if (temp != null) {
+                if (temp.parent.getChild(0).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    step = "选择双人对战答案"
+                }
+            }
+        }
+        if (step == "选择双人对战答案") {
+            sleep(15000)
+            println(step)
+            recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
+            mutableListAccessibilityNodeInfo.forEach { ani ->
+                println("className=${ani.className}")
+                println("text=${ani.text}")
+                println("contentDescription=${ani.contentDescription}")
+            }
+            step = "3213213"
         }
         if (step == "进入挑战答题") {
             sleep(1000)
@@ -968,8 +1053,6 @@ class AccService : AccessibilityService() {
                     false
                 )
             if (temp != null) {
-                // srs = 8
-                // srdz = 9
                 if (temp.parent.getChild(10).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     sleep(3000)
                     step = "选择挑战答题答案"
