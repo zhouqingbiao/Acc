@@ -650,6 +650,7 @@ class AccService : AccessibilityService() {
                 if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     sleep(1000)
                     step = "进入每日答题"
+                    step = "进入双人对战"
                 }
             }
 //            step = "进入每周答题"
@@ -877,7 +878,6 @@ class AccService : AccessibilityService() {
         if (step == "从每日答题返回我要答题") {
             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                 sleep(1000)
-                // onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
                 val tc = findByTextOfContains(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "退出", false
@@ -957,7 +957,6 @@ class AccService : AccessibilityService() {
                     mrdtDao!!.delete(mrdtDao!!.findById(roomId))
                     if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                         sleep(1000)
-                        // onDispatchGesture(340F, 1300F, 0F, 0F, 50, 50)
                         val tc = findByTextOfContains(
                             rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                             "退出", false
@@ -968,7 +967,6 @@ class AccService : AccessibilityService() {
                                 step = "进入每日答题"
                             }
                         }
-                        // step = "进入每日答题"
                     }
                 }
             }
@@ -1028,21 +1026,44 @@ class AccService : AccessibilityService() {
                 )
             if (temp != null) {
                 if (temp.parent.getChild(0).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
+                    sleep(10000)
                     step = "选择双人对战答案"
                 }
             }
         }
-        if (step == "选择双人对战答案") {
-            sleep(15000)
-            println(step)
-            recycle(rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"))
-            mutableListAccessibilityNodeInfo.forEach { ani ->
-                println("className=${ani.className}")
-                println("text=${ani.text}")
-                println("contentDescription=${ani.contentDescription}")
+        while (step == "选择双人对战答案") {
+            sleep(1000)
+            val temp = findByClassName(
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                "android.widget.RadioButton"
+            )
+            if (temp.size > 1) {
+                if (temp[(0 until temp.size).random()].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    step = "选择双人对战答案"
+                }
             }
-            step = "3213213"
+            val jxtz = findByText(
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                "继续挑战", false
+            )
+            if (jxtz != null) {
+                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                    sleep(1000)
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        sleep(1000)
+                        val tc = findByTextOfContains(
+                            rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                            "退出", false
+                        )
+                        if (tc != null) {
+                            if (tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                                sleep(1000)
+                                step = "进入挑战答题"
+                            }
+                        }
+                    }
+                }
+            }
         }
         if (step == "进入挑战答题") {
             sleep(1000)
@@ -1414,7 +1435,7 @@ class AccService : AccessibilityService() {
                         val doc = Jsoup.parse(hOCRText)
                         val a = doc.getElementsByClass("ocrx_word")
                         (0 until a.size).forEach { index ->
-                            if (a[index].text() == "A.") {
+                            if (a[index].text().contains("A")) {
                                 println("=======================" + a[index].text())
                                 val title = a[index].attributes().get("title")
                                 println(title)
@@ -1425,7 +1446,6 @@ class AccService : AccessibilityService() {
                                 println("=======================$x")
                                 println("=======================$y")
                                 onDispatchGesture(x, y, 0F, 0F, 50, 50)
-                                println("=======================")
                             }
                         }
                         tessBaseAPI.clear()
