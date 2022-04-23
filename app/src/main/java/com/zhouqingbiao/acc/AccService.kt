@@ -2,68 +2,29 @@ package com.zhouqingbiao.acc
 
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
-import android.graphics.Bitmap
 import android.graphics.Path
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock.sleep
-import android.view.Display
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import androidx.annotation.RequiresApi
 import androidx.room.Room
-import com.googlecode.tesseract.android.TessBaseAPI
 import com.zhouqingbiao.acc.dao.MrdtDao
 import com.zhouqingbiao.acc.dao.TzdtDao
 import com.zhouqingbiao.acc.database.XxqgDatabase
 import com.zhouqingbiao.acc.entity.Mrdt
 import com.zhouqingbiao.acc.entity.Tzdt
-import org.jsoup.Jsoup
-import java.io.File
 import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.util.concurrent.BlockingQueue
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
 
 
 @RequiresApi(Build.VERSION_CODES.N)
 class AccService : AccessibilityService() {
-    var tessBaseAPI = TessBaseAPI()
-
     var xxqgDatabase: XxqgDatabase? = null
 
     var mrdtDao: MrdtDao? = null
 
     var tzdtDao: TzdtDao? = null
-
-    /*
-     * Gets the number of available cores
-     * (not always the same as the maximum number of cores)
-     */
-    private val NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors()
-
-    // Instantiates the queue of Runnables as a LinkedBlockingQueue
-    private val workQueue: BlockingQueue<Runnable> =
-        LinkedBlockingQueue<Runnable>()
-
-    // Sets the amount of time an idle thread waits before terminating
-    private val KEEP_ALIVE_TIME = 1L
-
-    // Sets the Time Unit to seconds
-    private val KEEP_ALIVE_TIME_UNIT = TimeUnit.SECONDS
-
-    // Creates a thread pool manager
-    private val threadPoolExecutor: ThreadPoolExecutor = ThreadPoolExecutor(
-        // Initial pool size
-        NUMBER_OF_CORES,
-        // Max pool size
-        NUMBER_OF_CORES,
-        KEEP_ALIVE_TIME,
-        KEEP_ALIVE_TIME_UNIT,
-        workQueue
-    )
 
     private var step = "开始获取积分"
 
@@ -166,28 +127,6 @@ class AccService : AccessibilityService() {
         super.onServiceConnected()
 
         // 初始化
-
-        val inputStream = applicationContext.assets.open("chi_sim.traineddata")
-        var file = File(filesDir.path, File.separator + "tessdata")
-        if (!file.exists()) {
-            file.mkdirs()
-        }
-        file = File(file.path + File.separator + "chi_sim.traineddata")
-        if (!file.exists()) {
-            val fileOutputStream = FileOutputStream(file.path)
-            val buffer = ByteArray(1024)
-            var count: Int
-            while (inputStream.read(buffer).also { count = it } > 0) {
-                fileOutputStream.write(buffer, 0, count)
-            }
-            fileOutputStream.write(inputStream.read())
-            fileOutputStream.flush()
-            fileOutputStream.close()
-            inputStream.close()
-        }
-
-        tessBaseAPI.init(filesDir.path, "chi_sim")
-
 
         try {
             applicationContext.assets.open("Xxqg.db")
@@ -639,7 +578,7 @@ class AccService : AccessibilityService() {
         if (step == "进入每日答题") {
             val temp = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "每日答题", false
+                "每日答题"
             )
             if (temp != null) {
                 if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -649,7 +588,7 @@ class AccService : AccessibilityService() {
             }
             val zql = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "正确率：100%", false
+                "正确率：100%"
             )
             if (zql != null) {
                 if (performGlobalAction(GLOBAL_ACTION_BACK)) {
@@ -661,7 +600,7 @@ class AccService : AccessibilityService() {
         if (step == "点击查看提示") {
             val temp = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "查看提示", false
+                "查看提示"
             )
             if (temp != null) {
                 if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -674,7 +613,7 @@ class AccService : AccessibilityService() {
             if (rootInActiveWindow != null) {
                 val temp = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "提示", false
+                    "提示"
                 )
                 if (temp != null) {
                     t = temp.parent.parent.parent.getChild(0).getChild(0).getChild(0)
@@ -720,7 +659,7 @@ class AccService : AccessibilityService() {
             if (t == "单选题" || t == "多选题") {
                 val temp = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "A.", false
+                    "A."
                 )
                 temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                 sleep(1000)
@@ -759,7 +698,7 @@ class AccService : AccessibilityService() {
                 azMutableMapOf.forEach { az ->
                     val temp = findByText(
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                        az.key, false
+                        az.key
                     )
                     if (temp != null) {
                         azMutableMapOf[az.key] = temp.parent.getChild(2).text.toString()
@@ -767,19 +706,19 @@ class AccService : AccessibilityService() {
                 }
                 val qd = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "确定", false
+                    "确定"
                 )
                 if (qd != null) {
                     if (qd.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                         sleep(1000)
                         val xyt = findByText(
                             rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            "下一题", false
+                            "下一题"
                         )
                         if (xyt != null) {
                             val zqda = findByTextOfContains(
                                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                                "正确答案： ", false
+                                "正确答案： "
                             )
                             if (zqda != null) {
                                 val azString = zqda.text.toString().replace("正确答案： ", "")
@@ -817,14 +756,14 @@ class AccService : AccessibilityService() {
             if (t == "填空题") {
                 val qd = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "确定", false
+                    "确定"
                 )
                 if (qd != null) {
                     if (qd.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                         sleep(1000)
                         val zqda = findByTextOfContains(
                             rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            "正确答案： ", false
+                            "正确答案： "
                         )
                         if (zqda != null) {
                             val temp = findByClassName(
@@ -857,7 +796,7 @@ class AccService : AccessibilityService() {
                 sleep(1000)
                 val tc = findByTextOfContains(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "退出", false
+                    "退出"
                 )
                 if (tc != null) {
                     if (tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -871,7 +810,7 @@ class AccService : AccessibilityService() {
             if (t == "单选题") {
                 val temp = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    da, false
+                    da
                 )
                 temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                 step = "点击确定"
@@ -881,7 +820,7 @@ class AccService : AccessibilityService() {
                 (daSplit.indices).forEach { index ->
                     val temp = findByText(
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                        daSplit[index], false
+                        daSplit[index]
                     )
                     temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
                 }
@@ -918,7 +857,7 @@ class AccService : AccessibilityService() {
             sleep(1000)
             var temp = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "确定", false
+                "确定"
             )
             if (temp != null) {
                 if (temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -928,7 +867,7 @@ class AccService : AccessibilityService() {
             } else {
                 temp = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "下一题", false
+                    "下一题"
                 )
                 if (temp != null) {
                     mrdtDao!!.delete(mrdtDao!!.findById(roomId))
@@ -936,7 +875,7 @@ class AccService : AccessibilityService() {
                         sleep(1000)
                         val tc = findByTextOfContains(
                             rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            "退出", false
+                            "退出"
                         )
                         if (tc != null) {
                             if (tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -969,8 +908,7 @@ class AccService : AccessibilityService() {
             val temp =
                 findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "排行榜",
-                    false
+                    "排行榜"
                 )
             if (temp != null) {
                 if (temp.parent.getChild(8).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -984,14 +922,12 @@ class AccService : AccessibilityService() {
             val temp =
                 findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "开始比赛",
-                    false
+                    "开始比赛"
                 )
             val jrjfjlj =
                 findByTextOfContains(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "今日积分奖励局",
-                    false
+                    "今日积分奖励局"
                 )
             var jrjfjljCs = 0
             if (jrjfjlj != null) {
@@ -1025,7 +961,7 @@ class AccService : AccessibilityService() {
             }
             val jxtz = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "继续挑战", false
+                "继续挑战"
             )
             if (jxtz != null) {
                 if (jxtz.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -1039,8 +975,7 @@ class AccService : AccessibilityService() {
             val temp =
                 findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "排行榜",
-                    false
+                    "排行榜"
                 )
             if (temp != null) {
                 if (temp.parent.getChild(9).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -1053,8 +988,7 @@ class AccService : AccessibilityService() {
             val temp =
                 findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "随机匹配",
-                    false
+                    "随机匹配"
                 )
             if (temp != null) {
                 if (temp.parent.getChild(0).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -1067,7 +1001,7 @@ class AccService : AccessibilityService() {
             sleep(500)
             val zdl = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "知道了", false
+                "知道了"
             )
             if (zdl != null) {
                 if (zdl.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -1086,7 +1020,7 @@ class AccService : AccessibilityService() {
             }
             val jxtz = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "继续挑战", false
+                "继续挑战"
             )
             if (jxtz != null) {
                 if (performGlobalAction(GLOBAL_ACTION_BACK)) {
@@ -1095,7 +1029,7 @@ class AccService : AccessibilityService() {
                         sleep(1000)
                         val tc = findByTextOfContains(
                             rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            "退出", false
+                            "退出"
                         )
                         if (tc != null) {
                             if (tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -1112,8 +1046,7 @@ class AccService : AccessibilityService() {
             val temp =
                 findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "排行榜",
-                    false
+                    "排行榜"
                 )
             if (temp != null) {
                 if (temp.parent.getChild(10).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
@@ -1151,20 +1084,19 @@ class AccService : AccessibilityService() {
                 tzdtString = tzdtString.substring(0, tzdtString.length - 1)
                 val temp = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    da,
-                    false
+                    da
                 )
                 if (temp != null) {
                     if (temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                         sleep(3000)
                         val jsbj = findByText(
                             rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            "结束本局", false
+                            "结束本局"
                         )
                         // 本次答对 0 题
                         val bcdd = findByTextOfContains(
                             rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            "本次答对 ", false
+                            "本次答对 "
                         )
                         if (jsbj == null) {
                             tzdtDao!!.insert(Tzdt(0, t, da))
@@ -1205,8 +1137,6 @@ class AccService : AccessibilityService() {
     }
 
     override fun onInterrupt() {
-        // 在这里结束tessBaseAPI
-        tessBaseAPI.end()
     }
 
     // 正式可变List
@@ -1337,31 +1267,11 @@ class AccService : AccessibilityService() {
     }
 
     /**
-     * 根据ContentDescription查找控件
-     */
-    private fun findByContentDescription(
-        mutableList: MutableList<AccessibilityNodeInfo>,
-        contentDescription: String
-    ): AccessibilityNodeInfo? {
-        recycle(mutableList)
-        var temp: AccessibilityNodeInfo? = null
-        mutableListAccessibilityNodeInfo.forEach { ani ->
-            if (ani.contentDescription != null && ani.contentDescription != "") {
-                if (ani.contentDescription.toString() == contentDescription) {
-                    temp = ani
-                }
-            }
-        }
-        mutableListAccessibilityNodeInfo.clear()
-        return temp
-    }
-
-    /**
      * 根据Text查找控件
      */
     private fun findByText(
         mutableList: MutableList<AccessibilityNodeInfo>,
-        text: String, output: Boolean
+        text: String
     ): AccessibilityNodeInfo? {
         recycle(mutableList)
         var temp: AccessibilityNodeInfo? = null
@@ -1369,9 +1279,6 @@ class AccService : AccessibilityService() {
             if (ani.text != null && ani.text.toString() != "") {
                 if (ani.text.toString() == text) {
                     temp = ani
-                }
-                if (output) {
-                    println(ani.text)
                 }
             }
         }
@@ -1385,7 +1292,7 @@ class AccService : AccessibilityService() {
      */
     private fun findByTextOfContains(
         mutableList: MutableList<AccessibilityNodeInfo>,
-        text: String, output: Boolean
+        text: String
     ): AccessibilityNodeInfo? {
         recycle(mutableList)
         var temp: AccessibilityNodeInfo? = null
@@ -1393,9 +1300,6 @@ class AccService : AccessibilityService() {
             if (ani.text != null && ani.text.toString() != "") {
                 if (ani.text.toString().contains(text)) {
                     temp = ani
-                }
-                if (output) {
-                    println(ani.text)
                 }
             }
         }
@@ -1423,110 +1327,5 @@ class AccService : AccessibilityService() {
         }
         mutableListAccessibilityNodeInfo.clear()
         return mutableList
-    }
-
-    /**
-     * TakeScreenshotToFile
-     */
-    private fun takeScreenshotToFile(string: String, index: Int) {
-        var mBitmap: Bitmap?
-        val takeScreenshotCallback =
-            @RequiresApi(Build.VERSION_CODES.R)
-            object : TakeScreenshotCallback {
-                override fun onSuccess(p0: ScreenshotResult) {
-                    val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
-                    mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
-                    if (mBitmap != null) {
-                        val file =
-                            File(filesDir.path + File.separator + "png" + File.separator + string)
-                        if (!file.exists()) {
-                            file.mkdirs()
-                        }
-                        var pngFile: File? = null
-                        if (index == 1) {
-                            pngFile =
-                                File(file.path + File.separator + roomId + ".png")
-                        }
-                        if (index == 2) {
-                            pngFile =
-                                File(file.path + File.separator + roomId + "_" + roomId + ".png")
-                        }
-                        if (index == 3) {
-                            pngFile =
-                                File(file.path + File.separator + roomId + "_" + roomId + "_" + roomId + ".png")
-                        }
-                        if (pngFile != null) {
-                            if (!pngFile.exists()) {
-                                pngFile.createNewFile()
-                            }
-                        }
-                        val fileOutputStream = FileOutputStream(pngFile)
-                        mBitmap!!.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
-                        tessBaseAPI.clear()
-                    }
-                }
-
-                override fun onFailure(p0: Int) {
-                }
-            }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                takeScreenshot(
-                    Display.DEFAULT_DISPLAY,
-                    // applicationContext.mainExecutor
-                    threadPoolExecutor,
-                    takeScreenshotCallback
-                )
-            }
-        }
-    }
-
-    /**
-     * TessBaseAPI
-     */
-    private fun tessBaseAPI() {
-        var mBitmap: Bitmap?
-        val takeScreenshotCallback =
-            @RequiresApi(Build.VERSION_CODES.R)
-            object : TakeScreenshotCallback {
-                override fun onSuccess(p0: ScreenshotResult) {
-                    val bitmap = Bitmap.wrapHardwareBuffer(p0.hardwareBuffer, p0.colorSpace)
-                    mBitmap = bitmap?.copy(Bitmap.Config.ARGB_8888, true)
-                    if (mBitmap != null) {
-                        tessBaseAPI.setImage(mBitmap)
-                        val hOCRText = tessBaseAPI.getHOCRText(0)
-                        println(hOCRText)
-                        val doc = Jsoup.parse(hOCRText)
-                        val a = doc.getElementsByClass("ocrx_word")
-                        (0 until a.size).forEach { index ->
-                            if (a[index].text().contains("A")) {
-                                println("=======================" + a[index].text())
-                                val title = a[index].attributes().get("title")
-                                println(title)
-                                val xy = title.split(";")[0].replace("bbox ", "")
-                                println(xy)
-                                val x = xy.split(" ")[0].toFloat()
-                                val y = xy.split(" ")[1].toFloat()
-                                println("=======================$x")
-                                println("=======================$y")
-                                onDispatchGesture(x, y, 0F, 0F, 50, 50)
-                            }
-                        }
-                        tessBaseAPI.clear()
-                    }
-                }
-
-                override fun onFailure(p0: Int) {
-                }
-            }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                takeScreenshot(
-                    Display.DEFAULT_DISPLAY,
-                    threadPoolExecutor,
-                    takeScreenshotCallback
-                )
-            }
-        }
     }
 }
