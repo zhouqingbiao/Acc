@@ -454,7 +454,7 @@ class AccService : AccessibilityService() {
             sleep(8000)
             spcs++
             if (spcs < 6) {
-                onDispatchGesture(666F, 1111F, 666F, 111F, 50, 500)
+                onDispatchGesture(666F, 1111F, 666F, 111F, 50, 50)
             }
             if (spcs == 6) {
                 if (performGlobalAction(GLOBAL_ACTION_BACK)) {
@@ -532,6 +532,8 @@ class AccService : AccessibilityService() {
         }
         if (step == "开始阅读文章" && wzcs <= 6) {
             if (wyxdwzClick?.text != ywc) {
+                onDispatchGesture(666F, 1111F, 666F, 111F, 50, 50)
+                sleep(1000)
                 val temp =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
                 if (temp.size > 0) {
@@ -540,10 +542,6 @@ class AccService : AccessibilityService() {
                         if (wzcs < 6) {
                             sleep(8000)
                             performGlobalAction(GLOBAL_ACTION_BACK)
-                            sleep(1000)
-                            rootInActiveWindow.findAccessibilityNodeInfosByText("浙江")[0].parent.performAction(
-                                AccessibilityNodeInfo.ACTION_CLICK
-                            )
                             sleep(1000)
                         } else {
                             var times = 0
