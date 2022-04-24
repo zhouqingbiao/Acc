@@ -362,11 +362,8 @@ class AccService : AccessibilityService() {
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_ding")
                     if (temp.size > 0) {
                         if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                            sleep(1000)
-                            if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                                sleep(1000)
-                                step = "开始播放视听"
-                            }
+                            sleep(1500)
+                            step = "开始播放视听"
                         }
                     }
                 }
@@ -375,41 +372,38 @@ class AccService : AccessibilityService() {
                 step = "开始本地频道"
             }
         }
-        if (step == "开始播放视听") {
-            if (rootInActiveWindow != null) {
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("推荐")
-                if (temp.size > 0) {
-                    val temp1 = temp[1].parent.parent.parent.parent
-                    val temp2 = temp1.getChild(1).getChild(0).getChild(0).getChild(1)
-                    val temp3 = temp2.getChild(0).getChild(0).getChild(1).getChild(0)
-                    val temp4 = temp3.getChild(1).getChild(1).getChild(0)
-                    if (temp4.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        step = "开始视听次数"
+        while (step == "开始播放视听" && spcs <= 6) {
+            // 下滑
+            onDispatchGesture(666F, 1111F, 666F, 111F, 50, 50)
+            sleep(1000)
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("竖")
+            if (temp.size > 0) {
+                val temp1 = temp[0].parent.parent.parent.parent
+                val temp2 = temp1.getChild(1).getChild(0).getChild(0).getChild(1)
+                val listView = temp2.getChild(0).getChild(0).getChild(1).getChild(0)
+                val sj = (0 until listView.childCount).random()
+                if (listView.getChild(sj).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(9000)
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        sleep(1000)
+                        step = "开始播放视听"
+                        spcs++
+                        if (spcs == 6) {
+                            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                step = "点击工作"
+                            }
+                        }
                     }
-                }
-            }
-        }
-        if (step == "开始视听次数" && spcs <= 6) {
-            sleep(8000)
-            spcs++
-            if (spcs < 6) {
-                onDispatchGesture(666F, 1111F, 666F, 111F, 50, 50)
-            }
-            if (spcs == 6) {
-                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                    step = "点击工作"
                 }
             }
         }
         if (step == "点击工作") {
-            if (gz == null) {
-                val temp =
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_work")
-                if (temp.size > 0) {
-                    gz = temp[0]
-                    if (gz?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
-                        step = "开始本地频道"
-                    }
+            val temp =
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_work")
+            if (temp.size > 0) {
+                gz = temp[0]
+                if (gz?.performAction(AccessibilityNodeInfo.ACTION_CLICK) == true) {
+                    step = "开始本地频道"
                 }
             }
         }
@@ -425,7 +419,7 @@ class AccService : AccessibilityService() {
                 }
             }
             if (bdpdClick?.text == ywc && stxxscClick?.text == ywc && wyxdwzClick?.text == ywc) {
-                step = "再次进入积分"
+                step = "进入我的"
             }
         }
         if (step == "开始浙江卫视") {
@@ -469,7 +463,7 @@ class AccService : AccessibilityService() {
                 step = "开始阅读文章"
             }
         }
-        if (step == "开始阅读文章" && wzcs <= 6) {
+        while (step == "开始阅读文章" && wzcs <= 6) {
             if (wyxdwzClick?.text != ywc) {
                 onDispatchGesture(666F, 1111F, 666F, 111F, 50, 50)
                 sleep(1000)
@@ -1203,6 +1197,8 @@ class AccService : AccessibilityService() {
 
     /**
      * dispatchGesture
+     * X- Y↓ 上滑
+     * X- Y↑ 下滑
      */
     private fun onDispatchGesture(
         moveToX: Float,
