@@ -162,12 +162,12 @@ class AccService : AccessibilityService() {
             if (stxxsc!!.parent.parent.getChild(3).text.toString() == ywc) {
                 stxxscBoolean = true
             }
-//            if (mrdt!!.parent.parent.getChild(3).text.toString() == ywc) {
-//                mrdtBoolean = true
-//            }
-//            if (tzdt!!.parent.parent.getChild(3).text.toString() == ywc) {
-//                tzdtBoolean = true
-//            }
+            if (mrdt!!.parent.parent.getChild(3).text.toString() == ywc) {
+                mrdtBoolean = true
+            }
+            if (tzdt!!.parent.parent.getChild(3).text.toString() == ywc) {
+                tzdtBoolean = true
+            }
             if (fx!!.parent.parent.getChild(3).text.toString() == ywc) {
                 fxBoolean = true
             }
