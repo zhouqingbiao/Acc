@@ -80,6 +80,8 @@ class AccService : AccessibilityService() {
 
     private var wzCs = 1
 
+    private var azMutableMapOf: MutableMap<String, String> = mutableMapOf()
+
     override fun onServiceConnected() {
         super.onServiceConnected()
 
@@ -416,78 +418,84 @@ class AccService : AccessibilityService() {
             if (rootInActiveWindow != null) {
                 val temp =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_mine")
-                if (temp.size > 0) {
-                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        step = "点击我要答题"
-                    }
-                }
-            }
-        }
-        if (step == "点击我要答题") {
-            sleep(1000)
-            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("我要答题")
-            if (temp != null) {
-                if (temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     sleep(1000)
-                    step = if (mrdtBoolean) {
-                        "进入四人赛"
-                    } else {
-                        "进入每日答题"
-                    }
+                    step = "我要答题"
                 }
             }
         }
-        if (step == "进入每日答题") {
+        if (step == "我要答题") {
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("我要答题")
+            if (temp != null && temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                sleep(1000)
+                step = if (mrdtBoolean) {
+                    "四人赛"
+                } else {
+                    "每日答题"
+                }
+            }
+        }
+        if (step == "每日答题") {
             val temp = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "每日答题"
             )
-            if (temp != null) {
-                if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
-                    step = "点击查看提示"
-                }
+            if (temp != null && temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                sleep(1000)
+                step = "查看提示"
             }
             val zql = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "正确率：100%"
             )
-            if (zql != null) {
-                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                    sleep(1000)
-                    step = "进入每周答题"
-                    // 跳过每周答题 专项答题
-                    step = "进入四人赛"
-                }
+            if (zql != null && performGlobalAction(GLOBAL_ACTION_BACK)) {
+                sleep(1000)
+                step = "四人赛"
             }
         }
-        if (step == "点击查看提示") {
+        if (step == "查看提示") {
             if (rootInActiveWindow != null) {
                 val temp = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "查看提示"
                 )
-                if (temp != null) {
-                    if (temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(1000)
-                        step = "获取提示"
-                    }
+                if (temp != null && temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    step = "提示"
                 }
                 val zql = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "正确率：100%"
                 )
-                if (zql != null) {
+                if (zql != null && performGlobalAction(GLOBAL_ACTION_BACK)) {
+                    sleep(1000)
+                    step = "四人赛"
+                }
+                val xyt = findByText(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "下一题"
+                )
+                val wc = findByText(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "完成"
+                )
+                if (xyt != null || wc != null) {
+                    mrdtDao!!.delete(mrdtDao!!.findById(roomId))
                     if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                         sleep(1000)
-                        step = "进入每周答题"
-                        // 跳过每周答题 专项答题
-                        step = "进入四人赛"
+                        val tc = findByTextOfContains(
+                            rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                            "退出"
+                        )
+                        if (tc != null && tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                            sleep(1000)
+                            step = "每日答题"
+                        }
                     }
                 }
             }
         }
-        if (step == "获取提示") {
+        if (step == "提示") {
             if (rootInActiveWindow != null) {
                 val temp = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
@@ -518,35 +526,44 @@ class AccService : AccessibilityService() {
                             mrdt.forEach { m ->
                                 mrdtDao!!.delete(mrdtDao!!.findById(m.id))
                             }
-                            step = "查找每日答案"
+                            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                sleep(1000)
+                                step = "选A或填A"
+                            }
                         }
                         if (mrdt.size == 1) {
+                            roomId = mrdt[0].id
                             t = mrdt[0].t
                             da = mrdt[0].da
-                            step = "选或填每日答题答案"
-                            if (da == "") {
-                                step = "查找每日答案"
+                            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                sleep(1000)
+                                step = if (da == "") {
+                                    "选A或填A"
+                                } else {
+                                    "选或填每日答题答案"
+                                }
                             }
                         }
                         if (mrdt.isEmpty()) {
-                            step = "查找每日答案"
-                        }
-                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                            sleep(1000)
+                            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                sleep(1000)
+                                step = "选A或填A"
+                            }
                         }
                     }
                 }
             }
         }
-        if (step == "查找每日答案") {
+        if (step == "选A或填A") {
             if (t == "单选题" || t == "多选题") {
                 val temp = findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "A."
                 )
-                temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                sleep(1000)
-                step = "得出每日答题答案"
+                if (temp != null && temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    step = "每日答题确定"
+                }
             }
             if (t == "填空题") {
                 val temp = findByClassName(
@@ -560,138 +577,118 @@ class AccService : AccessibilityService() {
                         "A"
                     )
                     temp.forEach { t ->
-                        t.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
+                        if (t.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)) {
+                            sleep(1000)
+                            step = "每日答题确定"
+                        }
                     }
-                    sleep(1000)
-                    step = "得出每日答题答案"
                 }
             }
         }
-        while (step == "得出每日答题答案") {
-            if (rootInActiveWindow != null) {
-                if (t == "单选题" || t == "多选题") {
-                    val azMutableMapOf =
-                        mutableMapOf(
-                            "A." to "",
-                            "B." to "",
-                            "C." to "",
-                            "D." to "",
-                            "E." to "",
-                            "F." to ""
-                        )
-                    azMutableMapOf.forEach { az ->
-                        val temp = findByText(
+        if (step == "每日答题确定") {
+            if (t == "单选题" || t == "多选题") {
+                azMutableMapOf =
+                    mutableMapOf(
+                        "A." to "",
+                        "B." to "",
+                        "C." to "",
+                        "D." to "",
+                        "E." to "",
+                        "F." to ""
+                    )
+                azMutableMapOf.forEach { az ->
+                    val temp = findByText(
+                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                        az.key
+                    )
+                    if (temp != null) {
+                        azMutableMapOf[az.key] = temp.parent.getChild(2).text.toString()
+                    }
+                }
+            }
+            val temp = findByText(
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                "确定"
+            )
+            if (temp != null && temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                sleep(1000)
+                step = "每日答题正确答案"
+            }
+        }
+        if (step == "每日答题正确答案") {
+            val xyt = findByText(
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                "下一题"
+            )
+            val wc = findByText(
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                "完成"
+            )
+            if (xyt != null || wc != null) {
+                val zqda = findByTextOfContains(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "正确答案： "
+                )
+                if (zqda != null) {
+                    val azString = zqda.text.toString().replace("正确答案： ", "")
+                    var zqdaString = ""
+                    if (t == "单选题" || t == "多选题") {
+                        if (azString.length == 1) {
+                            mrdtDao!!.insert(
+                                Mrdt(
+                                    0,
+                                    t,
+                                    ts,
+                                    azMutableMapOf.getValue("$azString.")
+                                )
+                            )
+                            println("$t====$ts====${azMutableMapOf.getValue("$azString.")}")
+                        }
+                        if (azString.length > 1) {
+                            azString.forEach { az ->
+                                zqdaString += azMutableMapOf.getValue("$az.") + "|"
+                            }
+                            zqdaString = zqdaString.substring(0, zqdaString.length - 1)
+                            mrdtDao!!.insert(Mrdt(0, t, ts, zqdaString))
+                            println("$t====$ts====$zqdaString")
+                        }
+                    }
+                    if (t == "填空题") {
+                        val temp = findByClassName(
                             rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            az.key
+                            "android.widget.EditText"
                         )
-                        if (temp != null) {
-                            azMutableMapOf[az.key] = temp.parent.getChild(2).text.toString()
+                        if (temp.size == 1) {
+                            mrdtDao!!.insert(Mrdt(0, t, ts, azString))
+                            println("$t====$ts====$azString")
                         }
-                    }
-                    val qd = findByText(
-                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                        "确定"
-                    )
-                    if (qd != null) {
-                        if (qd.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                            sleep(1500)
-                            val xyt = findByText(
-                                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                                "下一题"
-                            )
-                            val wc = findByText(
-                                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                                "完成"
-                            )
-                            if (xyt != null || wc != null) {
-                                val zqda = findByTextOfContains(
-                                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                                    "正确答案： "
-                                )
-                                if (zqda != null) {
-                                    val azString = zqda.text.toString().replace("正确答案： ", "")
-                                    var zqdaString = ""
-                                    if (azString.length == 1) {
-                                        mrdtDao!!.insert(
-                                            Mrdt(
-                                                0,
-                                                t,
-                                                ts,
-                                                azMutableMapOf.getValue("$azString.")
-                                            )
-                                        )
-                                        println("$t====$ts====${azMutableMapOf.getValue("$azString.")}")
-                                    }
-                                    if (azString.length > 1) {
-                                        azString.forEach { az ->
-                                            zqdaString += azMutableMapOf.getValue("$az.") + "|"
-                                        }
-                                        zqdaString = zqdaString.substring(0, zqdaString.length - 1)
-                                        mrdtDao!!.insert(Mrdt(0, t, ts, zqdaString))
-                                        println("$t====$ts====$zqdaString")
-                                    }
-                                    step = "从每日答题返回我要答题"
-                                }
-                            } else {
-                                mrdtDao!!.insert(Mrdt(0, t, ts, azMutableMapOf.getValue("A.")))
-                                println("$t====$ts====${azMutableMapOf.getValue("A.")}")
-                                step = "点击查看提示"
+                        if (temp.size > 1) {
+                            azString.split(" ").forEach { az ->
+                                zqdaString += "$az|"
                             }
+                            zqdaString = zqdaString.substring(0, zqdaString.length - 1)
+                            mrdtDao!!.insert(Mrdt(0, t, ts, zqdaString))
+                            println("$t====$ts====$zqdaString")
                         }
                     }
+                    step = "返回我要答题"
                 }
-                if (t == "填空题") {
-                    val qd = findByText(
-                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                        "确定"
-                    )
-                    if (qd != null) {
-                        if (qd.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                            sleep(1500)
-                            val zqda = findByTextOfContains(
-                                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                                "正确答案： "
-                            )
-                            println(zqda?.text)
-                            if (zqda != null) {
-                                val temp = findByClassName(
-                                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                                    "android.widget.EditText"
-                                )
-                                val azString = zqda.text.toString().replace("正确答案： ", "")
-                                if (temp.size > 1) {
-                                    var zqdaString = ""
-                                    azString.split(" ").forEach { az ->
-                                        zqdaString += "$az|"
-                                    }
-                                    zqdaString = zqdaString.substring(0, zqdaString.length - 1)
-                                    mrdtDao!!.insert(Mrdt(0, t, ts, zqdaString))
-                                    println("$t====$ts====$zqdaString")
-                                    step = "从每日答题返回我要答题"
-                                }
-                                if (temp.size == 1) {
-                                    mrdtDao!!.insert(Mrdt(0, t, ts, azString))
-                                    println("$t====$ts====$azString")
-                                    step = "从每日答题返回我要答题"
-                                }
-                            }
-                        }
-                    }
-                }
+            } else {
+                mrdtDao!!.insert(Mrdt(0, t, ts, azMutableMapOf.getValue("A.")))
+                println("$t====$ts====${azMutableMapOf.getValue("A.")}")
+                step = "查看提示"
             }
         }
-        if (step == "从每日答题返回我要答题") {
+        if (step == "返回我要答题") {
             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                 sleep(1000)
-                val tc = findByTextOfContains(
+                val temp = findByTextOfContains(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "退出"
                 )
-                if (tc != null) {
-                    if (tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(1000)
-                        step = "进入每日答题"
-                    }
+                if (temp != null && temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    step = "每日答题"
                 }
             }
         }
@@ -701,8 +698,10 @@ class AccService : AccessibilityService() {
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     da
                 )
-                temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                step = "点击确定"
+                if (temp != null && temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    step = "选或填每日答题答案确定"
+                }
             }
             if (t == "多选题") {
                 val daSplit = da.split("|")
@@ -711,16 +710,29 @@ class AccService : AccessibilityService() {
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                         daSplit[index]
                     )
-                    temp?.parent?.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    if (temp != null && temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        sleep(1000)
+                        step = "选或填每日答题答案确定"
+                    }
                 }
-                step = "点击确定"
             }
             if (t == "填空题") {
                 val temp = findByClassName(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "android.widget.EditText"
                 )
-                if (da.indexOf("|") != -1) {
+                if (temp.size == 1) {
+                    val bundle = Bundle()
+                    bundle.putCharSequence(
+                        AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                        da
+                    )
+                    if (temp[0].performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)) {
+                        sleep(1000)
+                        step = "选或填每日答题答案确定"
+                    }
+                }
+                if (temp.size > 1) {
                     val daSplit = da.split("|")
                     (daSplit.indices).forEach { index ->
                         val bundle = Bundle()
@@ -728,93 +740,41 @@ class AccService : AccessibilityService() {
                             AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
                             daSplit[index]
                         )
-                        temp[index].performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
-                    }
-                    step = "点击确定"
-                } else {
-                    val bundle = Bundle()
-                    bundle.putCharSequence(
-                        AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
-                        da
-                    )
-                    temp[0].performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)
-                    step = "点击确定"
-                }
-            }
-        }
-        if (step == "点击确定") {
-            sleep(1000)
-            val qd = findByText(
-                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "确定"
-            )
-            if (qd != null) {
-                if (qd.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
-                    step = "点击查看提示"
-                }
-            }
-            if (qd == null) {
-                val xyt = findByText(
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "下一题"
-                )
-                if (xyt != null) {
-                    println("删除ID:$roomId")
-                    mrdtDao!!.delete(mrdtDao!!.findById(roomId))
-                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                        sleep(1500)
-                        val tc = findByTextOfContains(
-                            rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            "退出"
-                        )
-                        if (tc != null) {
-                            if (tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                                sleep(1000)
-                                step = "进入每日答题"
-                            }
+                        if (temp[index].performAction(
+                                AccessibilityNodeInfo.ACTION_SET_TEXT, bundle
+                            )
+                        ) {
+                            sleep(1000)
+                            step = "选或填每日答题答案确定"
                         }
                     }
                 }
             }
         }
-        if (step == "进入每周答题") {
-            sleep(1000)
-            onDispatchGesture(550F, 700F, 0F, 0F, 50, 50)
-            sleep(1000)
-            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                step = "进入专项答题"
+        if (step == "选或填每日答题答案确定") {
+            val temp = findByText(
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                "确定"
+            )
+            if (temp != null && temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                sleep(1000)
+                step = "查看提示"
             }
         }
-        if (step == "进入专项答题") {
-            sleep(1000)
-            onDispatchGesture(900F, 700F, 0F, 0F, 50, 50)
-            sleep(1000)
-            if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                step = "进入四人赛"
-            }
-        }
-        if (step == "进入四人赛") {
-            sleep(1000)
+        if (step == "四人赛") {
             val temp =
                 findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "排行榜"
                 )
-            if (temp != null) {
-                if (temp.parent.getChild(8).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
-                    step = "点击开始比赛"
-                }
+            if (temp != null && temp.parent.getChild(8)
+                    .performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            ) {
+                sleep(1000)
+                step = "开始比赛"
             }
         }
-        if (step == "点击开始比赛") {
-            sleep(1000)
-            val ksbs =
-                findByText(
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "开始比赛"
-                )
+        if (step == "开始比赛") {
             val jrjfjlj =
                 findByTextOfContains(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
@@ -825,60 +785,57 @@ class AccService : AccessibilityService() {
                 jrjfjljCs = jrjfjlj.text.toString().replace("今日积分奖励局", "").replace("/2", "").toInt()
             }
             if (jrjfjljCs <= 2) {
-                if (ksbs != null) {
-                    if (ksbs.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(15000)
-                        step = "选择四人赛答案"
-                    }
+                val ksbs =
+                    findByText(
+                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                        "开始比赛"
+                    )
+                if (ksbs != null && ksbs.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(15000)
+                    step = "四人赛答案"
                 }
             }
             if (jrjfjljCs > 2) {
                 if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                     sleep(1000)
-                    step = "进入双人对战"
+                    step = "双人对战"
                 }
             }
         }
-        while (step == "选择四人赛答案") {
-            sleep(1000)
-            val radioButton = findByClassName(
+        if (step == "四人赛答案") {
+            val temp = findByClassName(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "android.widget.RadioButton"
             )
-            if (radioButton.size > 1) {
-                if (radioButton[(0 until radioButton.size).random()].performAction(
-                        AccessibilityNodeInfo.ACTION_CLICK
-                    )
-                ) {
-                    step = "选择四人赛答案"
-                }
+            if (temp.size > 1 &&
+                temp[(0 until temp.size).random()].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            ) {
+                sleep(2000)
+                step = "四人赛答案"
             }
             val jxtz = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "继续挑战"
             )
-            if (jxtz != null) {
-                if (jxtz.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
-                    step = "点击开始比赛"
-                }
+            if (jxtz != null && jxtz.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                sleep(1000)
+                step = "开始比赛"
             }
         }
-        if (step == "进入双人对战") {
-            sleep(1000)
+        if (step == "双人对战") {
             val temp =
                 findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     "排行榜"
                 )
-            if (temp != null) {
-                if (temp.parent.getChild(9).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
-                    step = "点击随机匹配"
-                }
+            if (temp != null &&
+                temp.parent.getChild(9).performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            ) {
+                sleep(1000)
+                step = "随机匹配"
             }
         }
-        if (step == "点击随机匹配") {
+        if (step == "随机匹配") {
             val jrjfjlj =
                 findByTextOfContains(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
@@ -895,11 +852,11 @@ class AccService : AccessibilityService() {
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                         "随机匹配"
                     )
-                if (temp != null) {
-                    if (temp.parent.getChild(0).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(15000)
-                        step = "选择双人对战答案"
-                    }
+                if (temp != null &&
+                    temp.parent.getChild(0).performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                ) {
+                    sleep(15000)
+                    step = "双人对战答案"
                 }
             }
             if (jrjfjljCs > 1) {
@@ -912,58 +869,51 @@ class AccService : AccessibilityService() {
                     if (tc != null) {
                         if (tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                             sleep(1000)
-                            step = "进入挑战答题"
+                            step = "挑战答题"
                         }
                     }
                 }
             }
         }
-        while (step == "选择双人对战答案") {
-            sleep(1000)
+        if (step == "双人对战答案") {
             val zdl = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "知道了"
             )
-            if (zdl != null) {
-                if (zdl.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
-                    step = "进入挑战答题"
-                }
+            if (zdl != null && zdl.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                sleep(1000)
+                step = "挑战答题"
             }
             val temp = findByClassName(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "android.widget.RadioButton"
             )
-            if (temp.size > 1) {
-                if (temp[(0 until temp.size).random()].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    step = "选择双人对战答案"
-                }
+            if (temp.size > 1 &&
+                temp[(0 until temp.size).random()].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+            ) {
+                sleep(2000)
+                step = "双人对战答案"
             }
             val jxtz = findByText(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "继续挑战"
             )
-            if (jxtz != null) {
+            if (jxtz != null && performGlobalAction(GLOBAL_ACTION_BACK)) {
+                sleep(1000)
                 if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                     sleep(1000)
-                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                    val tc = findByTextOfContains(
+                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                        "退出"
+                    )
+                    if (tc != null && tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                         sleep(1000)
-                        val tc = findByTextOfContains(
-                            rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            "退出"
-                        )
-                        if (tc != null) {
-                            if (tc.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                                sleep(1000)
-                                step = "进入挑战答题"
-                            }
-                        }
+                        step = "挑战答题"
                     }
                 }
             }
         }
-        if (step == "进入挑战答题") {
-            sleep(1000)
+        if (step == "挑战答题") {
             val temp =
                 findByText(
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
@@ -971,13 +921,12 @@ class AccService : AccessibilityService() {
                 )
             if (temp != null) {
                 if (temp.parent.getChild(10).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
-                    step = "选择挑战答题答案"
+                    sleep(5000)
+                    step = "挑战答题答案"
                 }
             }
         }
-        if (step == "选择挑战答题答案") {
-            sleep(3000)
+        if (step == "挑战答题答案") {
             val mutableList = findByClassName(
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                 "android.widget.ListView"
@@ -986,21 +935,17 @@ class AccService : AccessibilityService() {
                 val random = (0 until mutableList[0].childCount).random()
                 t = mutableList[0].parent.getChild(0).text.toString()
                 da = mutableList[0].getChild(random).getChild(0).getChild(1).text.toString()
-                var tzdtString = ""
+                roomId = 0
                 (0 until mutableList[0].childCount).forEach { index ->
-                    tzdtString += mutableList[0].getChild(index).getChild(0)
-                        .getChild(1).text.toString() + "|"
-                }
-                tzdtString = tzdtString.substring(0, tzdtString.length - 1)
-                val tzdt = tzdtDao!!.findByT(t)
-                if (tzdt.isNotEmpty()) {
-                    tzdt.forEach { t ->
-                        val temp = findByText(
-                            rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            t.da
-                        )
-                        if (temp != null) {
-                            da = t.da
+                    da = mutableList[0].getChild(index).getChild(0).getChild(1).text.toString()
+                    val tzdt = tzdtDao!!.findByT("$t|$da")
+                    if (tzdt.size == 1) {
+                        roomId = tzdt[0].id
+                        da = tzdt[0].da
+                    }
+                    if (tzdt.size > 1) {
+                        tzdt.forEach { t ->
+                            tzdtDao!!.delete(tzdtDao!!.findById(t.id))
                         }
                     }
                 }
@@ -1008,43 +953,44 @@ class AccService : AccessibilityService() {
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
                     da
                 )
-                if (temp != null) {
-                    if (temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(3000)
-                        val jsbj = findByText(
-                            rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            "结束本局"
-                        )
-                        // 本次答对 0 题
-                        val bcdd = findByTextOfContains(
-                            rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                            "本次答对 "
-                        )
-                        if (jsbj == null) {
-                            tzdtDao!!.insert(Tzdt(0, t, da))
-                            step = "选择挑战答题答案"
-                        } else {
-                            println(t)
-                            println(tzdtString)
+                if (temp != null && temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(3000)
+                    val jsbj = findByText(
+                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                        "结束本局"
+                    )
+                    val bcdd = findByTextOfContains(
+                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                        "本次答对 "
+                    )
+                    if (jsbj == null) {
+                        tzdtDao!!.insert(Tzdt(0, "$t|$da", da))
+                        println("$t|$da====$da")
+                        step = "挑战答题答案"
+                    }
+                    if (jsbj != null) {
+                        if (roomId.toInt() != 0) {
+                            tzdtDao!!.delete(tzdtDao!!.findById(roomId))
+                        }
+                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                            sleep(1000)
                             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                                 sleep(1000)
-                                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                                    sleep(1000)
-                                    if (bcdd != null) {
-                                        if (bcdd.text.toString().replace("本次答对 ", "")
-                                                .replace(" 题", "")
-                                                .toInt() >= 5
-                                        ) {
+                                if (bcdd != null) {
+                                    if (bcdd.text.toString().replace("本次答对 ", "")
+                                            .replace(" 题", "")
+                                            .toInt() >= 5
+                                    ) {
+                                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                                            sleep(1000)
                                             if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                                                 sleep(1000)
-                                                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                                                    step = "结束"
-                                                }
+                                                step = "结束"
                                             }
-                                        } else {
-                                            step = "进入挑战答题"
-                                            sleep(8000)
                                         }
+                                    } else {
+                                        sleep(5000)
+                                        step = "挑战答题"
                                     }
                                 }
                             }
@@ -1069,7 +1015,6 @@ class AccService : AccessibilityService() {
     private fun recycle(mlani: MutableList<AccessibilityNodeInfo>) {
         // 临时可变List
         val mutableList: MutableList<AccessibilityNodeInfo> = mutableListOf()
-
         // 开始遍历
         mlani.forEach { ani ->
             // 有子节点才进行添加操作
@@ -1083,7 +1028,6 @@ class AccService : AccessibilityService() {
                 }
             }
         }
-
         // 只循环临时可变List
         if (mutableList.size > 0) {
             recycle(mutableList)
