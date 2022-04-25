@@ -80,6 +80,8 @@ class AccService : AccessibilityService() {
 
     private var wzCs = 1
 
+    private var tzCs = 1
+
     private var azMutableMapOf: MutableMap<String, String> = mutableMapOf()
 
     override fun onServiceConnected() {
@@ -925,6 +927,7 @@ class AccService : AccessibilityService() {
                             .performAction(AccessibilityNodeInfo.ACTION_CLICK)
                     ) {
                         sleep(5000)
+                        tzCs = 1
                         step = "挑战答题答案"
                     }
                 }
@@ -948,16 +951,18 @@ class AccService : AccessibilityService() {
                 t = mutableList[0].parent.getChild(0).text.toString()
                 da = mutableList[0].getChild(random).getChild(0).getChild(1).text.toString()
                 roomId = 0
-                (0 until mutableList[0].childCount).forEach { index ->
-                    da = mutableList[0].getChild(index).getChild(0).getChild(1).text.toString()
-                    val tzdt = tzdtDao!!.findByT("$t|$da")
-                    if (tzdt.size == 1) {
-                        roomId = tzdt[0].id
-                        da = tzdt[0].da
-                    }
-                    if (tzdt.size > 1) {
-                        tzdt.forEach { t ->
-                            tzdtDao!!.delete(tzdtDao!!.findById(t.id))
+                if (tzCs <= 5) {
+                    (0 until mutableList[0].childCount).forEach { index ->
+                        da = mutableList[0].getChild(index).getChild(0).getChild(1).text.toString()
+                        val tzdt = tzdtDao!!.findByT("$t|$da")
+                        if (tzdt.size == 1) {
+                            roomId = tzdt[0].id
+                            da = tzdt[0].da
+                        }
+                        if (tzdt.size > 1) {
+                            tzdt.forEach { t ->
+                                tzdtDao!!.delete(tzdtDao!!.findById(t.id))
+                            }
                         }
                     }
                 }
@@ -976,7 +981,10 @@ class AccService : AccessibilityService() {
                         "本次答对 "
                     )
                     if (jsbj == null) {
-                        tzdtDao!!.insert(Tzdt(0, "$t|$da", da))
+                        if (roomId.toInt() != 0) {
+                            tzdtDao!!.insert(Tzdt(0, "$t|$da", da))
+                        }
+                        tzCs++
                         println("$t|$da====$da")
                         step = "挑战答题答案"
                     }
