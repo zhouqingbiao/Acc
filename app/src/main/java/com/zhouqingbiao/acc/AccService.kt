@@ -115,11 +115,11 @@ class AccService : AccessibilityService() {
                 // 点击积分
                 if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     sleep(1000)
-                    step = "获取学习积分类目"
+                    step = "学习积分类目"
                 }
             }
         }
-        if (step == "获取学习积分类目") {
+        if (step == "学习积分类目") {
             if (rootInActiveWindow != null) {
                 val temp =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame")
@@ -149,12 +149,12 @@ class AccService : AccessibilityService() {
                     }
                     mutableListAccessibilityNodeInfo.clear()
                     if (qgyd != null) {
-                        step = "获取积分明细"
+                        step = "积分明细"
                     }
                 }
             }
         }
-        if (step == "获取积分明细") {
+        if (step == "积分明细") {
             if (wyxdwz!!.parent.parent.getChild(3).text.toString() == ywc) {
                 wyxdwzBoolean = true
             }
@@ -914,15 +914,27 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "挑战答题") {
-            val temp =
-                findByText(
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                    "排行榜"
-                )
-            if (temp != null) {
-                if (temp.parent.getChild(10).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(5000)
-                    step = "挑战答题答案"
+            if (!tzdtBoolean) {
+                val temp =
+                    findByText(
+                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                        "排行榜"
+                    )
+                if (temp != null) {
+                    if (temp.parent.getChild(10)
+                            .performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    ) {
+                        sleep(5000)
+                        step = "挑战答题答案"
+                    }
+                }
+            } else {
+                if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                    sleep(1000)
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        sleep(1000)
+                        step = "结束"
+                    }
                 }
             }
         }
@@ -997,6 +1009,13 @@ class AccService : AccessibilityService() {
                         }
                     }
                 }
+            }
+        }
+        if (step == "结束") {
+            val temp =
+                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_score")
+            if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                step = ""
             }
         }
     }
