@@ -17,7 +17,6 @@ import com.zhouqingbiao.acc.entity.Mrdt
 import com.zhouqingbiao.acc.entity.Tzdt
 import java.io.FileNotFoundException
 
-
 @RequiresApi(Build.VERSION_CODES.N)
 class AccService : AccessibilityService() {
     private var xxqgDatabase: XxqgDatabase? = null
@@ -89,9 +88,9 @@ class AccService : AccessibilityService() {
 
         // 初始数据库
         xxqgDatabase = try {
-            applicationContext.assets.open("Xxqg.db")
+            applicationContext.assets.open("Xxqg")
             Room.databaseBuilder(applicationContext, XxqgDatabase::class.java, "Xxqg")
-                .createFromAsset("Xxqg.db").allowMainThreadQueries().build()
+                .createFromAsset("Xxqg").allowMainThreadQueries().build()
         } catch (e: FileNotFoundException) {
             Room.databaseBuilder(applicationContext, XxqgDatabase::class.java, "Xxqg")
                 .allowMainThreadQueries().build()
