@@ -170,7 +170,7 @@ class AccService : AccessibilityService() {
                 mrdtBoolean = true
             }
             if (tzdt!!.parent.parent.getChild(3).text.toString() == ywc) {
-                tzdtBoolean = false
+                tzdtBoolean = true
             }
             if (fx!!.parent.parent.getChild(3).text.toString() == ywc) {
                 fxBoolean = true
@@ -974,7 +974,7 @@ class AccService : AccessibilityService() {
                     )
                     if (jsbj == null) {
                         if (tzCs <= 5) {
-                            if (roomId.toInt() != 0) {
+                            if (roomId.toInt() == 0) {
                                 tzdtDao!!.insert(Tzdt(0, "$t|$da", da))
                                 println("$t|$da====$da")
                             }
