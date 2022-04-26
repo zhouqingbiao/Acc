@@ -170,7 +170,7 @@ class AccService : AccessibilityService() {
                 mrdtBoolean = true
             }
             if (tzdt!!.parent.parent.getChild(3).text.toString() == ywc) {
-                tzdtBoolean = true
+                tzdtBoolean = false
             }
             if (fx!!.parent.parent.getChild(3).text.toString() == ywc) {
                 fxBoolean = true
@@ -283,54 +283,10 @@ class AccService : AccessibilityService() {
                     } else {
                         if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                             sleep(1000)
-                            step = "视听学习"
+                            step = "本地频道"
                         }
                     }
                 }
-            }
-        }
-        if (step == "视听学习") {
-            if (!stxxBoolean) {
-                if (rootInActiveWindow != null) {
-                    val temp =
-                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_ding")
-                    if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(1500)
-                        step = "视听学习次数"
-                    }
-                }
-            } else {
-                step = "本地频道"
-            }
-        }
-        while (step == "视听学习次数" && spCs <= 6) {
-            onDispatchGesture(666F, 1111F, 666F, 111F, 50, 150)
-            sleep(1000)
-            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("竖")
-            if (temp.size > 0) {
-                val temp1 = temp[0].parent.parent.parent.parent
-                val temp2 = temp1.getChild(1).getChild(0).getChild(0).getChild(1)
-                val temp3 = temp2.getChild(0).getChild(0).getChild(1).getChild(0)
-                val random = (0 until temp3.childCount).random()
-                if (temp3.getChild(random).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(8000)
-                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                        sleep(1000)
-                        step = "视听学习次数"
-                        spCs++
-                        if (spCs > 6) {
-                            step = "工作"
-                        }
-                    }
-                }
-            }
-        }
-        if (step == "工作") {
-            val temp =
-                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_work")
-            if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                sleep(1000)
-                step = "本地频道"
             }
         }
         if (step == "本地频道") {
@@ -347,7 +303,7 @@ class AccService : AccessibilityService() {
                     }
                 }
             } else {
-                step = "我的"
+                step = "视听学习"
             }
         }
         if (step == "浙江卫视") {
@@ -405,7 +361,7 @@ class AccService : AccessibilityService() {
                         }
                         wzCs++
                         if (wzCs > 6) {
-                            step = "我的"
+                            step = "视听学习"
                         }
                         if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                             sleep(1000)
@@ -413,7 +369,43 @@ class AccService : AccessibilityService() {
                     }
                 }
             } else {
+                step = "视听学习"
+            }
+        }
+        if (step == "视听学习") {
+            if (!stxxBoolean) {
+                if (rootInActiveWindow != null) {
+                    val temp =
+                        rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_ding")
+                    if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        sleep(1500)
+                        step = "视听学习次数"
+                    }
+                }
+            } else {
                 step = "我的"
+            }
+        }
+        if (step == "视听学习次数" && spCs <= 6) {
+            onDispatchGesture(666F, 1111F, 666F, 111F, 50, 150)
+            sleep(1000)
+            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("竖")
+            if (temp.size > 0) {
+                val temp1 = temp[0].parent.parent.parent.parent
+                val temp2 = temp1.getChild(1).getChild(0).getChild(0).getChild(1)
+                val temp3 = temp2.getChild(0).getChild(0).getChild(1).getChild(0)
+                val random = (0 until temp3.childCount).random()
+                if (temp3.getChild(random).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(8000)
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        sleep(1000)
+                        step = "视听学习次数"
+                        spCs++
+                        if (spCs > 6) {
+                            step = "我的"
+                        }
+                    }
+                }
             }
         }
         if (step == "我的") {
@@ -981,11 +973,13 @@ class AccService : AccessibilityService() {
                         "本次答对 "
                     )
                     if (jsbj == null) {
-                        if (roomId.toInt() != 0) {
-                            tzdtDao!!.insert(Tzdt(0, "$t|$da", da))
+                        if (tzCs <= 5) {
+                            if (roomId.toInt() != 0) {
+                                tzdtDao!!.insert(Tzdt(0, "$t|$da", da))
+                                println("$t|$da====$da")
+                            }
+                            tzCs++
                         }
-                        tzCs++
-                        println("$t|$da====$da")
                         step = "挑战答题答案"
                     }
                     if (jsbj != null) {
