@@ -944,8 +944,9 @@ class AccService : AccessibilityService() {
                 roomId = 0
                 if (tzCs <= 5) {
                     (0 until mutableList[0].childCount).forEach { index ->
-                        da = mutableList[0].getChild(index).getChild(0).getChild(1).text.toString()
-                        val tzdt = tzdtDao!!.findByT("$t|$da")
+                        val d =
+                            mutableList[0].getChild(index).getChild(0).getChild(1).text.toString()
+                        val tzdt = tzdtDao!!.findByT("$t|$d")
                         if (tzdt.size == 1) {
                             roomId = tzdt[0].id
                             da = tzdt[0].da
