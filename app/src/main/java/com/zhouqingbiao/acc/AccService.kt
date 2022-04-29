@@ -196,7 +196,7 @@ class AccService : AccessibilityService() {
                     }
                 }
             } else {
-                step = "视听学习"
+                step = "本地频道"
             }
         }
         if (step == "欢迎发表你的观点") {
@@ -377,34 +377,36 @@ class AccService : AccessibilityService() {
                     val temp =
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_ding")
                     if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(1500)
-                        step = "视听学习次数"
+                        sleep(1000)
+                        if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                            sleep(1000)
+                            step = "视听学习点击"
+                        }
                     }
                 }
             } else {
                 step = "我的"
             }
         }
-        if (step == "视听学习次数" && spCs <= 6) {
-            onDispatchGesture(666F, 1111F, 666F, 111F, 50, 150)
-            sleep(1000)
+        if (step == "视听学习点击") {
             val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("竖")
             if (temp.size > 0) {
                 val temp1 = temp[0].parent.parent.parent.parent
                 val temp2 = temp1.getChild(1).getChild(0).getChild(0).getChild(1)
                 val temp3 = temp2.getChild(0).getChild(0).getChild(1).getChild(0)
-                val random = (0 until temp3.childCount).random()
-                if (temp3.getChild(random).performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(8000)
-                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                        sleep(1000)
-                        step = "视听学习次数"
-                        spCs++
-                        if (spCs > 6) {
-                            step = "我的"
-                        }
-                    }
+                val temp4 = temp3.getChild(1).getChild(1).getChild(0)
+                if (temp4.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    step = "视听学习次数"
+                    sleep(1000)
                 }
+            }
+        }
+        if (step == "视听学习次数" && spCs <= 6) {
+            sleep(8000)
+            onDispatchGesture(666F, 1111F, 666F, 111F, 50, 150)
+            spCs++
+            if (spCs > 6 && performGlobalAction(GLOBAL_ACTION_BACK)) {
+                step = "我的"
             }
         }
         if (step == "我的") {
