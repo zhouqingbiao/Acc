@@ -799,23 +799,27 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "四人赛答案") {
-            val temp = findByClassName(
-                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "android.widget.RadioButton"
-            )
-            if (temp.size > 1 &&
-                temp[(0 until temp.size).random()].performAction(AccessibilityNodeInfo.ACTION_CLICK)
-            ) {
-                sleep(2000)
+            try {
+                val temp = findByClassName(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "android.widget.RadioButton"
+                )
+                if (temp.size > 1 &&
+                    temp[(0 until temp.size).random()].performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                ) {
+                    sleep(2000)
+                    step = "四人赛答案"
+                }
+                val jxtz = findByText(
+                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
+                    "继续挑战"
+                )
+                if (jxtz != null && jxtz.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    sleep(1000)
+                    step = "开始比赛"
+                }
+            } catch (e: Exception) {
                 step = "四人赛答案"
-            }
-            val jxtz = findByText(
-                rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/webview_frame"),
-                "继续挑战"
-            )
-            if (jxtz != null && jxtz.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                sleep(1000)
-                step = "开始比赛"
             }
         }
         if (step == "双人对战") {
