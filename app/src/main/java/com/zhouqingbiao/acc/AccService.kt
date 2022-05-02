@@ -191,7 +191,7 @@ class AccService : AccessibilityService() {
                     val temp =
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
                     if (temp.size > 0 && temp[0].parent.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(1000)
+                        sleep(1500)
                         step = "欢迎发表你的观点"
                     }
                 }
@@ -206,7 +206,7 @@ class AccService : AccessibilityService() {
                 if (temp.size > 0 && temp[0].getChild(0)
                         .performAction(AccessibilityNodeInfo.ACTION_CLICK)
                 ) {
-                    sleep(1000)
+                    sleep(500)
                     step = "好观点将会被优先展示和发布"
                 }
             }
@@ -221,10 +221,10 @@ class AccService : AccessibilityService() {
                         "学习强国！"
                     )
                     if (temp.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, bundle)) {
-                        sleep(1000)
+                        sleep(500)
                         temp = findByText(mutableListOf(rootInActiveWindow), "发布")
                         if (temp != null && temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                            sleep(1000)
+                            sleep(500)
                             step = "删除"
                         }
                     }
@@ -235,7 +235,7 @@ class AccService : AccessibilityService() {
             if (rootInActiveWindow != null) {
                 val temp = findByText(mutableListOf(rootInActiveWindow), "删除")
                 if (temp != null && temp.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
+                    sleep(500)
                     step = "确认"
                 }
             }
@@ -245,7 +245,7 @@ class AccService : AccessibilityService() {
                 val temp =
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("android:id/button1")
                 if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
+                    sleep(500)
                     step = "分享"
                 }
             }
@@ -257,7 +257,7 @@ class AccService : AccessibilityService() {
                 if (temp.size > 0 && temp[0].getChild(3)
                         .performAction(AccessibilityNodeInfo.ACTION_CLICK)
                 ) {
-                    sleep(1000)
+                    sleep(500)
                     step = "分享到学习强国"
                 }
             }
@@ -266,7 +266,7 @@ class AccService : AccessibilityService() {
             if (rootInActiveWindow != null) {
                 val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("分享到学习强国")
                 if (temp.size > 0 && temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(1000)
+                    sleep(500)
                     step = "选择联系人"
                 }
             }
@@ -275,7 +275,7 @@ class AccService : AccessibilityService() {
             if (rootInActiveWindow != null) {
                 val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("选择联系人")
                 if (temp.size > 0 && performGlobalAction(GLOBAL_ACTION_BACK)) {
-                    sleep(1000)
+                    sleep(500)
                     fxCs++
                     if (fxCs <= 2) {
                         step = "分享"
@@ -378,10 +378,7 @@ class AccService : AccessibilityService() {
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/home_bottom_tab_button_ding")
                     if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                         sleep(1000)
-                        if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                            sleep(1000)
-                            step = "视听学习点击"
-                        }
+                        step = "视听学习点击"
                     }
                 }
             } else {
@@ -389,16 +386,20 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "视听学习点击") {
-            val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("竖")
-            if (temp.size > 0) {
-                val temp1 = temp[0].parent.parent.parent.parent
-                val temp2 = temp1.getChild(1).getChild(0).getChild(0).getChild(1)
-                val temp3 = temp2.getChild(0).getChild(0).getChild(1).getChild(0)
-                val temp4 = temp3.getChild(1).getChild(1).getChild(0)
-                if (temp4.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    step = "视听学习次数"
-                    sleep(1000)
+            try {
+                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("竖")
+                if (temp.size > 0) {
+                    val temp1 = temp[0].parent.parent.parent.parent
+                    val temp2 = temp1.getChild(1).getChild(0).getChild(0).getChild(1)
+                    val temp3 = temp2.getChild(0).getChild(0).getChild(1).getChild(0)
+                    val temp4 = temp3.getChild(1).getChild(1).getChild(0)
+                    if (temp4.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                        step = "视听学习次数"
+                        sleep(1000)
+                    }
                 }
+            } catch (e: Exception) {
+                step = "视听学习"
             }
         }
         if (step == "视听学习次数" && spCs <= 6) {
@@ -706,7 +707,7 @@ class AccService : AccessibilityService() {
                         daSplit[index]
                     )
                     if (temp != null && temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(1000)
+                        sleep(500)
                         step = "选或填每日答题答案确定"
                     }
                 }
