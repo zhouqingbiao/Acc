@@ -191,7 +191,7 @@ class AccService : AccessibilityService() {
                     val temp =
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
                     if (temp.size > 0 && temp[0].parent.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(1500)
+                        sleep(1000)
                         step = "欢迎发表你的观点"
                     }
                 }
@@ -206,8 +206,12 @@ class AccService : AccessibilityService() {
                 if (temp.size > 0 && temp[0].getChild(0)
                         .performAction(AccessibilityNodeInfo.ACTION_CLICK)
                 ) {
-                    sleep(500)
-                    step = "好观点将会被优先展示和发布"
+                    val temp1 = findByText(mutableListOf(rootInActiveWindow), "好观点将会被优先展示")
+                    step = if (temp1 != null) {
+                        "好观点将会被优先展示和发布"
+                    } else {
+                        "欢迎发表你的观点"
+                    }
                 }
             }
         }
