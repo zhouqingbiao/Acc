@@ -62,9 +62,6 @@ class AccService : AccessibilityService() {
 
     private var dy: AccessibilityNodeInfo? = null
 
-    private var fx: AccessibilityNodeInfo? = null
-    private var fxBoolean = false
-
     private var fbgd: AccessibilityNodeInfo? = null
     private var fbgdBoolean = false
 
@@ -72,8 +69,6 @@ class AccService : AccessibilityService() {
     private var bdpdBoolean = false
 
     private var qgyd: AccessibilityNodeInfo? = null
-
-    private var fxCs = 1
 
     private var spCs = 1
 
@@ -135,21 +130,20 @@ class AccService : AccessibilityService() {
                                 "视听学习" -> stxx = ani
                                 "视听学习时长" -> stxxsc = ani
                                 "每日答题" -> mrdt = ani
-                                "每周答题" -> mzdt = ani
                                 "专项答题" -> zxdt = ani
                                 "挑战答题" -> tzdt = ani
                                 "四人赛" -> srs = ani
                                 "双人对战" -> srdz = ani
                                 "订阅" -> dy = ani
-                                "分享" -> fx = ani
                                 "发表观点" -> fbgd = ani
                                 "本地频道" -> bdpd = ani
                                 "强国运动" -> qgyd = ani
+                                "每周答题" -> mzdt = ani
                             }
                         }
                     }
                     mutableListAccessibilityNodeInfo.clear()
-                    if (qgyd != null) {
+                    if (mzdt != null) {
                         step = "积分明细"
                     }
                 }
@@ -171,9 +165,6 @@ class AccService : AccessibilityService() {
             if (tzdt!!.parent.parent.getChild(3).text.toString() == ywc) {
                 tzdtBoolean = true
             }
-            if (fx!!.parent.parent.getChild(3).text.toString() == ywc) {
-                fxBoolean = true
-            }
             if (fbgd!!.parent.parent.getChild(3).text.toString() == ywc) {
                 fbgdBoolean = true
             }
@@ -186,11 +177,11 @@ class AccService : AccessibilityService() {
             }
         }
         if (step == "发表观点") {
-            if (!fbgdBoolean || !fxBoolean) {
+            if (!fbgdBoolean) {
                 if (rootInActiveWindow != null) {
                     val temp =
                         rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/general_card_title_id")
-                    if (temp.size > 0 && temp[0].parent.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                    if (temp.size > 0 && temp[1].parent.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                         sleep(1000)
                         step = "欢迎发表你的观点"
                     }
@@ -250,44 +241,9 @@ class AccService : AccessibilityService() {
                     rootInActiveWindow.findAccessibilityNodeInfosByViewId("android:id/button1")
                 if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
                     sleep(500)
-                    step = "分享"
-                }
-            }
-        }
-        if (step == "分享" && fxCs <= 2) {
-            if (rootInActiveWindow != null) {
-                val temp =
-                    rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/BOTTOM_LAYER_VIEW_ID")
-                if (temp.size > 0 && temp[0].getChild(3)
-                        .performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                ) {
-                    sleep(500)
-                    step = "分享到学习强国"
-                }
-            }
-        }
-        if (step == "分享到学习强国") {
-            if (rootInActiveWindow != null) {
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("分享到学习强国")
-                if (temp.size > 0 && temp[0].parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                    sleep(500)
-                    step = "选择联系人"
-                }
-            }
-        }
-        if (step == "选择联系人") {
-            if (rootInActiveWindow != null) {
-                val temp = rootInActiveWindow.findAccessibilityNodeInfosByText("选择联系人")
-                if (temp.size > 0 && performGlobalAction(GLOBAL_ACTION_BACK)) {
-                    sleep(500)
-                    fxCs++
-                    if (fxCs <= 2) {
-                        step = "分享"
-                    } else {
-                        if (performGlobalAction(GLOBAL_ACTION_BACK)) {
-                            sleep(1000)
-                            step = "本地频道"
-                        }
+                    if (performGlobalAction(GLOBAL_ACTION_BACK)) {
+                        sleep(500)
+                        step = "本地频道"
                     }
                 }
             }
@@ -480,7 +436,10 @@ class AccService : AccessibilityService() {
                     "完成"
                 )
                 if (xyt != null || wc != null) {
-                    mrdtDao!!.delete(mrdtDao!!.findById(roomId))
+                    try {
+                        mrdtDao!!.delete(mrdtDao!!.findById(roomId))
+                    } catch (e: Exception) {
+                    }
                     if (performGlobalAction(GLOBAL_ACTION_BACK)) {
                         sleep(1000)
                         val tc = findByTextOfContains(
@@ -531,6 +490,7 @@ class AccService : AccessibilityService() {
                                 step = "选A或填A"
                             }
                         }
+                        roomId = 0
                         if (mrdt.size == 1) {
                             roomId = mrdt[0].id
                             t = mrdt[0].t
@@ -711,7 +671,7 @@ class AccService : AccessibilityService() {
                         daSplit[index]
                     )
                     if (temp != null && temp.parent.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
-                        sleep(500)
+                        sleep(100)
                         step = "选或填每日答题答案确定"
                     }
                 }
