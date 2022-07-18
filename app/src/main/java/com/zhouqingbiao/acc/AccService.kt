@@ -988,6 +988,7 @@ class AccService : AccessibilityService() {
             val temp =
                 rootInActiveWindow.findAccessibilityNodeInfosByViewId("cn.xuexi.android:id/comm_head_xuexi_score")
             if (temp.size > 0 && temp[0].performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                xxqgDatabase!!.close()
                 step = ""
             }
         }
